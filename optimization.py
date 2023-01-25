@@ -115,8 +115,8 @@ class LayoutProblem(Problem):
         for i in range(0, len(x), 7):
             elements.append(
                 networking.element.Element(
-                    position=(x[i], x[i + 1], x[i + 2]),
-                    rotation=(x[i + 3], x[i + 4], x[i + 5], x[i + 6]),
+                    position=networking.element.Position(x=x[i], y=x[i + 1], z=x[i + 2]),
+                    rotation=networking.element.Rotation(x=x[i + 3], y=x[i + 4], z=x[i + 5], w=x[i + 6]),
                 )
             )
 
@@ -137,8 +137,8 @@ def get_algorithm(n_objectives: int):
     ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=1)
 
     # create the algorithm object
-    algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 1-3
-    # algorithm = UNSGA3(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 3
+    # algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 1-3
+    algorithm = UNSGA3(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 3
     # algorithm = SMSEMOA(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 3
     # algorithm = RVEA(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 3
 
@@ -152,7 +152,8 @@ def generate_pareto_optimal_layouts(
     initial_layout: networking.layout.Layout,
     socket,
     reduce=False,
-    plot=True,
+    plot=False,
+    save=False,
 ):
     """Generate the Pareto optimal layouts.
 
@@ -193,15 +194,16 @@ def generate_pareto_optimal_layouts(
     print("Non-dominated solutions: %s" % res.X)
 
     # Save the results
-    algorithm_name = algorithm.__class__.__name__
-    np.save(
-        f"examples/neck_and_arm_angle/algorithm/{algorithm_name}_pareto_front.npy",
-        res.F,
-    )
-    np.save(
-        f"examples/neck_and_arm_angle/algorithm/{algorithm_name}_non_dominated_solutions.npy",
-        res.X,
-    )
+    if save:
+        algorithm_name = algorithm.__class__.__name__
+        np.save(
+            f"examples/neck_and_arm_angle/algorithm/{algorithm_name}_pareto_front.npy",
+            res.F,
+        )
+        np.save(
+            f"examples/neck_and_arm_angle/algorithm/{algorithm_name}_non_dominated_solutions.npy",
+            res.X,
+        )
 
     scatterplot = Scatter(title="Pareto front")
     scatterplot.add(res.F, alpha=0.5)

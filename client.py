@@ -6,7 +6,6 @@ from networking.messages import (
     HelloRequest,
     OptimizationRequest,
     EvaluationRequest,
-    to_json,
     from_json,
 )
 from networking.layout import Layout
@@ -39,16 +38,16 @@ def handle_response(response_type, response_data):
 def send_request(socket, request_type, request_data):
     """Send a request and return the response."""
     # Send the request
-    socket.send_multipart(
-        [request_type.encode("utf-8"), to_json(request_data).encode("utf-8")]
+    socket.send_string(
+        request_type + request_data.to_json()
     )
 
     # Receive a response
-    response = socket.recv_multipart()
+    response = socket.recv_string()
 
     # Parse the response
-    response_type = response[0].decode("utf-8")
-    response_data = from_json(response_type, response[1].decode("utf-8"))
+    response_type = response[0]
+    response_data = from_json(response_type, response[1:] if len(response) > 1 else "")
 
     # Handle the response
     handle_response(response_type, response_data)

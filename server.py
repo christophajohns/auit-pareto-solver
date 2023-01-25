@@ -7,7 +7,6 @@ from networking.messages import (
     ErrorResponse,
     OptimizationResponse,
     EvaluationResponse,
-    to_json,
     from_json,
 )
 import AUIT
@@ -61,11 +60,11 @@ def run_server(port=5555):
         print(f"Listening on port {port}...")
 
         # Receive a request
-        request = socket.recv_multipart()
+        request = socket.recv_string()
 
         # Parse the request
-        request_type = request[0].decode("utf-8")
-        request_data = from_json(request_type, request[1].decode("utf-8"))
+        request_type = request[0]
+        request_data = from_json(request_type, request[1:] if len(request) > 1 else "")
 
         # Handle the request
         response_type, response_data = handle_request(request_type, request_data)
@@ -73,8 +72,8 @@ def run_server(port=5555):
         # Send the response
         if response_data is not None:
             print("Sending response...")
-            socket.send_multipart(
-                [response_type.encode("utf-8"), to_json(response_data).encode("utf-8")]
+            socket.send_string(
+                response_type + response_data.to_json()
             )
         else:
             socket.send_string("ok")
