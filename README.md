@@ -20,6 +20,6 @@ The project is developed using Python 3.9.
 You can create the necessary environment using conda with the following 
 command:
 
-````zsh
+```zsh
 conda env create -f environment.yml
 ```
