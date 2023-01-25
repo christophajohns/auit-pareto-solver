@@ -1,3 +1,5 @@
+"""Server for the Python solver backend."""
+
 import zmq
 import sys
 from networking.messages import (

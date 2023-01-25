@@ -1,3 +1,5 @@
+"""Client for the AUIT server."""
+
 import zmq
 import sys
 from networking.messages import (
