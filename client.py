@@ -12,27 +12,28 @@ from networking.layout import Layout
 import AUIT
 
 
-def handle_response(response_type, response_data):
+def handle_response(response_type, response_data, verbose=False):
     """Handle a response."""
     # If response type is HelloResponse, print a message
     if response_type == "h":
-        print("Received a HelloResponse")
+        if verbose: print("Received a HelloResponse")
     # If response type is OptimizationResponse, print a message
     # NOTE: This should be implemented by the AUIT client.
     elif response_type == "o":
-        print("Received an OptimizationResponse")
+        if verbose: print("Received an OptimizationResponse")
         AUIT.handle_optimization_response(response_data)
     # If response type is EvaluationResponse, print a message
     elif response_type == "e":
-        print("Received an EvaluationResponse")
-        # print("Costs:", response_data.costs)
-        # print("Violations:", response_data.violations)
+        if verbose:
+            print("Received an EvaluationResponse")
+            # print("Costs:", response_data.costs)
+            # print("Violations:", response_data.violations)
     # If response type is ErrorResponse, print the error
     elif response_type == "x":
-        print("Received an ErrorResponse: %s" % response_data.error)
+        if verbose: print("Received an ErrorResponse: %s" % response_data.error)
     # If response type is unknown, print a message
     else:
-        print("Received an unknown response type: %s" % response_type)
+        if verbose: print("Received an unknown response type: %s" % response_type)
 
 
 def send_request(socket, request_type, request_data):
@@ -83,10 +84,11 @@ def send_optimization_request(
     return send_request(socket, request_type, request_data)
 
 
-def send_costs_request(socket, layouts):
+def send_costs_request(socket, layouts, verbose=False):
     """Send an EvaluationRequest and return the response."""
     # Print a message
-    print("Sending EvaluationRequest...")
+    if verbose:
+        print("Sending EvaluationRequest...")
 
     # Construct the request
     request_type = "E"

@@ -2,6 +2,7 @@
 
 import numpy as np
 from pymoo.core.problem import Problem
+from pymoo.core.callback import Callback
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.algorithms.moo.unsga3 import UNSGA3
 from pymoo.algorithms.moo.rvea import RVEA
@@ -14,6 +15,7 @@ from pymoo.visualization.scatter import Scatter
 import client
 import networking.layout
 import networking.element
+from tqdm import tqdm
 
 # Disable pymoo warnings
 from pymoo.config import Config
@@ -27,6 +29,21 @@ Config.warnings["not_compiled"] = False
 # Algorithms: NSGA-III vs U-NSGA-III vs SMSEMOA --> NSGA-III (ref_dirs: Riesz, pop: 4, n_gen: 100), U-NSGA-III (ref_dirs: Riesz, pop: 4, n_gen: 100), SMSEMOA (ref_dirs: Riesz, pop: 4, n_gen: 100)
 # Decompositions: WS vs Tchebicheff vs AASF --> w_1 = 0.25, w_2 = 0.75; w_1 = w_2 = 0.5; w_1 = 0.75, w_2 = 0.25 with AASF(eps=1e-10, beta=25) to provide sharper direction towards 45 deg line
 
+class PrintProgress(Callback):
+    """A callback to print the current progress (i.e., the current generation)."""
+
+    def __init__(self, n_gen):
+        super().__init__()
+        self.n_gen = n_gen
+
+    def notify(self, algorithm):
+        # print(f"Generation: {algorithm.n_iter}")
+        tqdm(
+            desc="n_gen",
+            total=self.n_gen,
+            initial=algorithm.n_iter,
+            unit="gen",
+        ).update()
 
 class LayoutProblem(Problem):
     """A multi-objective optimization problem for layouts."""
@@ -154,6 +171,7 @@ def generate_pareto_optimal_layouts(
     reduce=False,
     plot=False,
     save=False,
+    verbose=True,
 ):
     """Generate the Pareto optimal layouts.
 
@@ -176,7 +194,8 @@ def generate_pareto_optimal_layouts(
     algorithm = get_algorithm(n_objectives)
 
     # Create the termination criterion
-    termination = get_termination("n_gen", 100)  # Exp. 1-3: 100
+    n_gen = 100  # Exp. 1-3: 100
+    termination = get_termination("n_gen", n_gen)
 
     # Run the optimization
     res = minimize(
@@ -184,14 +203,16 @@ def generate_pareto_optimal_layouts(
         algorithm,
         termination,
         seed=1,
+        callback=PrintProgress(n_gen=n_gen),
         # verbose=True,
         save_history=True,
         copy_algorithm=False,
     )
 
     # Print the results
-    print("Pareto front: %s" % res.F)
-    print("Non-dominated solutions: %s" % res.X)
+    if verbose:
+        print("Pareto front: %s" % res.F)
+        print("Non-dominated solutions: %s" % res.X)
 
     # Save the results
     if save:
