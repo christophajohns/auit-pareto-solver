@@ -13,3 +13,13 @@ We explore the feasibility of our approach by generating adaptations for a basic
 
 This is a Python-based solver for the Adaptive User Interface Toolkit (AUIT) 
 returning Pareto optimal adapations.
+
+### Development
+
+The project is developed using Python 3.9.
+You can create the necessary environment using conda with the following 
+command:
+
+````zsh
+conda env create -f environment.yml
+```
