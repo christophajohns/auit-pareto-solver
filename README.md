@@ -13,15 +13,34 @@ We explore the feasibility of our approach by generating adaptations for a basic
 
 ## Python Pareto Solver
 
-This is a Python-based solver for the Adaptive User Interface Toolkit (AUIT) 
+This is a Python-based solver for the Adaptive User Interface Toolkit (AUIT)
 returning Pareto optimal adapations.
+
+### Usage
+
+The solver can be used as a command line tool to start a server providing the Pareto optimal solutions for a given set of objectives and constraints.
+It makes requests to the AUIT server via a ZeroMQ client to generate the solutions and returns the Pareto optimal solutions as a response.
+The server is exposed on port 5555.
+The client connects to the AUIT server on port 5556.
+By default, the solver uses the U-NSGA-III algorithm and High Trade-Off Points decomposition technique.
+
+```zsh
+$ python solver.py
+Listening on port 5555...
+```
 
 ### Development
 
 The project is developed using Python 3.9.
-You can create the necessary environment using conda with the following 
+You can create the necessary environment using conda with the following
 command:
 
 ```zsh
-conda env create -f environment.yml
+$ conda env create -f environment.yml
+```
+
+To export the environment to a new `environment.yml` file, run:
+
+```zsh
+$ conda env export | grep -v "^prefix: " > environment.yml
 ```
