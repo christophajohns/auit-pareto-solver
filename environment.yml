@@ -1,20 +1,22 @@
 name: auit-pareto-solver
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - blas=1.0=openblas
-  - ca-certificates=2023.01.10=hca03da5_0
-  - certifi=2022.12.7=py39hca03da5_0
+  - ca-certificates=2022.12.7=h4653dfc_0
+  - certifi=2022.12.7=pyhd8ed1ab_0
   - libcxx=14.0.6=h848a8c0_0
   - libffi=3.4.2=hca03da5_6
   - libgfortran=5.0.0=11_3_0_hca03da5_28
   - libgfortran5=11.3.0=h009349e_28
   - libopenblas=0.3.21=h269037a_0
+  - libsodium=1.0.18=h27ca646_1
   - llvm-openmp=14.0.6=hc6e5704_0
   - ncurses=6.3=h1a28f6b_3
   - numpy=1.23.5=py39h1398885_0
   - numpy-base=1.23.5=py39h90707a3_0
-  - openssl=1.1.1s=h1a28f6b_0
+  - openssl=1.1.1s=h03a7124_1
   - pip=22.3.1=py39hca03da5_0
   - python=3.9.16=hc0d8a6c_0
   - readline=8.2=h1a28f6b_0
@@ -24,6 +26,7 @@ dependencies:
   - tzdata=2022g=h04d1e81_0
   - wheel=0.37.1=pyhd3eb1b0_0
   - xz=5.2.10=h80987f9_1
+  - zeromq=4.3.4=hbdafb3b_1
   - zlib=1.2.13=h5a0b063_0
   - pip:
       - about-time==4.2.1
