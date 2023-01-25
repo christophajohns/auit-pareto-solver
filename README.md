@@ -1,5 +1,7 @@
 # Pareto Optimal UI Placements for Adaptive Mixed Reality
 
+> A Python-based Pareto solver for the Adaptive User Interfaces Toolkit (AUIT).
+
 ## Abstract
 
 Adaptive mixed reality applications adjust their user interfaces based on the context in which they are used to provide a smooth experience for different users and environments.
