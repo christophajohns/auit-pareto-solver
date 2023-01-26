@@ -222,64 +222,68 @@ Example optimization response:
 {
   "solutions": [
     {
-        "elements":   {
-            "id": "button:1",
-            "position": {
+      "elements": [
+        {
+          "id": "button:1",
+          "position": {
             "x": 1.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         },
         {
-            "id": "button:2",
-            "position": {
+          "id": "button:2",
+          "position": {
             "x": 2.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         }
+      ]
     },
     {
-        "elements":   {
-            "id": "button:1",
-            "position": {
+      "elements": [
+        {
+          "id": "button:1",
+          "position": {
             "x": 2.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         },
         {
-            "id": "button:2",
-            "position": {
+          "id": "button:2",
+          "position": {
             "x": 3.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         }
+      ]
     }
   ]
 }
@@ -301,64 +305,68 @@ Example evaluation request:
 {
   "layouts": [
     {
-        "elements":   {
-            "id": "button:1",
-            "position": {
+      "elements": [
+        {
+          "id": "button:1",
+          "position": {
             "x": 1.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         },
         {
-            "id": "button:2",
-            "position": {
+          "id": "button:2",
+          "position": {
             "x": 2.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         }
+      ]
     },
     {
-        "elements":   {
-            "id": "button:1",
-            "position": {
+      "elements": [
+        {
+          "id": "button:1",
+          "position": {
             "x": 2.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         },
         {
-            "id": "button:2",
-            "position": {
+          "id": "button:2",
+          "position": {
             "x": 3.0,
             "y": 0.0,
             "z": 0.0
-            },
-            "rotation": {
+          },
+          "rotation": {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
             "w": 1.0
-            }
+          }
         }
+      ]
     }
   ]
 }
