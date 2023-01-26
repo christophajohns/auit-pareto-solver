@@ -160,7 +160,7 @@ class OptimizationRequest(Request):
         return OptimizationRequest(
             n_objectives=data["nObjectives"],
             n_constraints=data["nConstraints"] if "nConstraints" in data else 0,
-            initial_layout=Layout.from_json(data["initialLayout"]),
+            initial_layout=Layout.from_dict(data["initialLayout"]),
         )
     
     def to_json(self) -> str:
