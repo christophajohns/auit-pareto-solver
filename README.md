@@ -108,70 +108,19 @@ Example element:
 
 ##### Layout
 
-A layout is a list of UI elements.
+A layout is an object containing a list of UI elements.
 
 ```json
-[
-    <Element>,
-    <Element>,
-    ...
-]
+{
+    "elements": [<Element>, <Element>, ...]
+}
 ```
 
 Example layout:
 
 ```json
-[
-  {
-    "id": "button:1",
-    "position": {
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0
-    },
-    "rotation": {
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0,
-      "w": 1.0
-    }
-  },
-  {
-    "id": "button:2",
-    "position": {
-      "x": 1.0,
-      "y": 0.0,
-      "z": 0.0
-    },
-    "rotation": {
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0,
-      "w": 1.0
-    }
-  }
-]
-```
-
-#### Optimization Request
-
-An optimization request (message type: `O`) is sent from the AUIT client to the solver to request a set of Pareto optimal solutions for a given set of objectives and constraints.
-
-```json
 {
-    "nObjectives": <int>,
-    "nConstraints": <int>,
-    "initialLayout": <Layout>
-}
-```
-
-Example optimization request:
-
-```json
-{
-  "nObjectives": 3,
-  "nConstraints": 2,
-  "initialLayout": [
+  "elements": [
     {
       "id": "button:1",
       "position": {
@@ -204,6 +153,59 @@ Example optimization request:
 }
 ```
 
+#### Optimization Request
+
+An optimization request (message type: `O`) is sent from the AUIT client to the solver to request a set of Pareto optimal solutions for a given set of objectives and constraints.
+
+```json
+{
+    "nObjectives": <int>,
+    "nConstraints": <int>,
+    "initialLayout": <Layout>
+}
+```
+
+Example optimization request:
+
+```json
+{
+  "nObjectives": 3,
+  "nConstraints": 2,
+  "initialLayout": {
+    "elements": [
+      {
+        "id": "button:1",
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0,
+          "w": 1.0
+        }
+      },
+      {
+        "id": "button:2",
+        "position": {
+          "x": 1.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0,
+          "w": 1.0
+        }
+      }
+    ]
+  }
+}
+```
+
 #### Optimization Response
 
 An optimization response (message type: `o`) is sent by the solver to the AUIT server with a set of Pareto optimal solutions for a given set of objectives and constraints.
@@ -219,66 +221,66 @@ Example optimization response:
 ```json
 {
   "solutions": [
-    [
-      {
-        "id": "button:1",
-        "position": {
-          "x": 1.0,
-          "y": 0.0,
-          "z": 0.0
+    {
+        "elements":   {
+            "id": "button:1",
+            "position": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
+        {
+            "id": "button:2",
+            "position": {
+            "x": 2.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         }
-      },
-      {
-        "id": "button:2",
-        "position": {
-          "x": 2.0,
-          "y": 0.0,
-          "z": 0.0
+    },
+    {
+        "elements":   {
+            "id": "button:1",
+            "position": {
+            "x": 2.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
+        {
+            "id": "button:2",
+            "position": {
+            "x": 3.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         }
-      }
-    ],
-    [
-      {
-        "id": "button:1",
-        "position": {
-          "x": 2.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
-        }
-      },
-      {
-        "id": "button:2",
-        "position": {
-          "x": 3.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
-        }
-      }
-    ]
+    }
   ]
 }
 ```
@@ -298,66 +300,66 @@ Example evaluation request:
 ```json
 {
   "layouts": [
-    [
-      {
-        "id": "button:1",
-        "position": {
-          "x": 1.0,
-          "y": 0.0,
-          "z": 0.0
+    {
+        "elements":   {
+            "id": "button:1",
+            "position": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
+        {
+            "id": "button:2",
+            "position": {
+            "x": 2.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         }
-      },
-      {
-        "id": "button:2",
-        "position": {
-          "x": 2.0,
-          "y": 0.0,
-          "z": 0.0
+    },
+    {
+        "elements":   {
+            "id": "button:1",
+            "position": {
+            "x": 2.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
+        {
+            "id": "button:2",
+            "position": {
+            "x": 3.0,
+            "y": 0.0,
+            "z": 0.0
+            },
+            "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+            }
         }
-      }
-    ],
-    [
-      {
-        "id": "button:1",
-        "position": {
-          "x": 2.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
-        }
-      },
-      {
-        "id": "button:2",
-        "position": {
-          "x": 3.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "rotation": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "w": 1.0
-        }
-      }
-    ]
+    }
   ]
 }
 ```
