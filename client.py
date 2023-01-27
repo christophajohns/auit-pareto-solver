@@ -26,8 +26,8 @@ def handle_response(response_type, response_data, verbose=False):
     elif response_type == "e":
         if verbose:
             print("Received an EvaluationResponse")
-            # print("Costs:", response_data.costs)
-            # print("Violations:", response_data.violations)
+            print("Costs:", response_data.costs)
+            print("Violations:", response_data.violations)
     # If response type is ErrorResponse, print the error
     elif response_type == "x":
         if verbose: print("Received an ErrorResponse: %s" % response_data.error)
@@ -36,8 +36,14 @@ def handle_response(response_type, response_data, verbose=False):
         if verbose: print("Received an unknown response type: %s" % response_type)
 
 
-def send_request(socket, request_type, request_data):
+def send_request(socket, request_type, request_data, verbose=False):
     """Send a request and return the response."""
+    # If verbose, print a message
+    if verbose:
+        print("Sending a %s request" % request_type)
+        print("request_data:", request_data)
+
+
     # Send the request
     socket.send_string(
         request_type + request_data.to_json()

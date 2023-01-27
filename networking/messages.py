@@ -157,10 +157,13 @@ class OptimizationRequest(Request):
 
         """
         data = json.loads(message_data)
+        initial_layout = Layout.from_dict(data["initialLayout"]) \
+            if type(data["initialLayout"]) is dict \
+            else Layout.from_json(data["initialLayout"])
         return OptimizationRequest(
             n_objectives=data["nObjectives"],
             n_constraints=data["nConstraints"] if "nConstraints" in data else 0,
-            initial_layout=Layout.from_dict(data["initialLayout"]),
+            initial_layout=initial_layout,
         )
     
     def to_json(self) -> str:

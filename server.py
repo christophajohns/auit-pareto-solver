@@ -2,6 +2,7 @@
 
 import zmq
 import sys
+import json
 from networking.messages import (
     HelloResponse,
     ErrorResponse,
@@ -47,7 +48,7 @@ def handle_request(request_type, request_data, verbose=False):
         return "x", ErrorResponse(error="Unknown request type: %s" % request_type)
 
 
-def run_server(port=5555, verbose=True):
+def run_server(port=5555, verbose=False):
     """Run the server."""
     # Create a context and a socket
     context = zmq.Context()
@@ -58,10 +59,16 @@ def run_server(port=5555, verbose=True):
     while True:
 
         # Print listening message
-        if verbose: print(f"Listening on port {port}...")
+        print(f"Listening on port {port}...")
 
         # Receive a request
         request = socket.recv_string()
+
+        # Print the request
+        if verbose:
+            print("Received a request:")
+            print("request_type:", request[0])
+            print("request_data:", json.loads(request[1:]))
 
         # Parse the request
         request_type = request[0]
@@ -72,7 +79,10 @@ def run_server(port=5555, verbose=True):
 
         # Send the response
         if response_data is not None:
-            if verbose: print("Sending response...")
+            if verbose:
+                print("Sending response...")
+                print("response_type:", response_type)
+                print("response_data:", response_data.to_json())
             socket.send_string(
                 response_type + response_data.to_json()
             )

@@ -134,7 +134,3 @@ dmypy.json
 
 # VSCode
 .vscode/
-
-# Mocks
-AUIT.py
-tests/test_AUIT.py
