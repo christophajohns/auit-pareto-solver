@@ -47,6 +47,19 @@ To export the environment to a new `environment.yml` file, run:
 $ conda env export | grep -v "^prefix: " > environment.yml
 ```
 
+For testing, we have included a Python script that mocks the AUIT server and client and calls the solver.
+The script can be run with the following command:
+
+```zsh
+$ python AUIT.py
+```
+
+The functionality of the AUIT mock can be tested by running the following command:
+
+```zsh
+$ python tests/test_AUIT.py
+```
+
 ### Networking Protocol
 
 Details on the networking between AUIT and the Python solver can be found in the [documentation](docs/protocol.md).
