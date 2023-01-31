@@ -9,7 +9,6 @@ from networking.messages import (
     from_json,
 )
 from networking.layout import Layout
-import AUIT
 
 
 def handle_response(response_type, response_data, verbose=False):

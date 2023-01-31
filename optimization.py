@@ -145,7 +145,7 @@ class LayoutProblem(Problem):
 def get_algorithm(n_objectives: int):
     """Create an algorithm instance."""
     # set population size
-    pop_size = 20  # Exp. 1-2: 1000, Exp. 3: 4
+    pop_size = 1000  # Exp. 1-2: 1000, Exp. 3: 4
 
     # create the reference directions to be used for the optimization
     # ref_dirs = get_reference_directions(

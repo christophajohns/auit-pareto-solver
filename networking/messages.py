@@ -356,7 +356,7 @@ class EvaluationRequest(Request):
 
         """
         return json.dumps({
-            "layouts": [layout.to_json() for layout in self.layouts],
+            "items": [layout.to_json() for layout in self.layouts],
         })
 
 

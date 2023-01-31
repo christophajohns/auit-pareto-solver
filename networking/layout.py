@@ -15,7 +15,7 @@ class Layout:
 
     def __dict__(self) -> dict:
         """Return a dictionary representation of the layout."""
-        return {"elements": [element.__dict__() for element in self.elements]}
+        return {"items": [element.__dict__() for element in self.elements]}
 
     def from_dict(data: dict) -> Layout:
         """Return a layout from a dictionary."""
