@@ -67,7 +67,7 @@ def run_server(port=5555, verbose=True):
         request_data = from_json(request_type, request[1:] if len(request) > 1 else "")
 
         # Handle the request
-        response_type, response_data = handle_request(request_type, request_data, True)
+        response_type, response_data = handle_request(request_type, request_data, verbose)
 
         # Send the response
         if response_data is not None:

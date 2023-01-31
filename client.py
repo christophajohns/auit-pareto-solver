@@ -35,8 +35,11 @@ def handle_response(response_type, response_data, verbose=False):
         if verbose: print("Received an unknown response type: %s" % response_type)
 
 
-def send_request(socket, request_type, request_data):
+def send_request(socket, request_type, request_data, verbose=False):
     """Send a request and return the response."""
+    if verbose:
+        print("Sending a request:", request_type, request_data.to_json())
+
     # Send the request
     socket.send_string(
         request_type + request_data.to_json()
@@ -44,6 +47,9 @@ def send_request(socket, request_type, request_data):
 
     # Receive a response
     response = socket.recv_string()
+
+    if verbose:
+        print("Received a response:", response)
 
     # Parse the response
     response_type = response[0]
