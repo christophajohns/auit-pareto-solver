@@ -135,7 +135,7 @@ class OptimizationRequest(Request):
                 "nObjectives": <int>,
                 "nConstraints": <int>,
                 "initialLayout": {
-                    "elements": [
+                    "items": [
                         {
                             "id": <str>,
                             "position": {
@@ -174,7 +174,7 @@ class OptimizationRequest(Request):
                 "nObjectives": <int>,
                 "nConstraints": <int>,
                 "initialLayout": {
-                    "elements": [
+                    "items": [
                         {
                             "id": <str>,
                             "position": {
@@ -195,10 +195,11 @@ class OptimizationRequest(Request):
             }
 
         """
+        
         return json.dumps({
             "nObjectives": self.n_objectives,
             "nConstraints": self.n_constraints,
-            "initialLayout": self.initial_layout.to_json(),
+            "initialLayout": self.initial_layout.__dict__(),
         })
 
 
@@ -219,7 +220,7 @@ class OptimizationResponse(Response):
             - OptimizationResponse ("o"): {
                 "solutions": [
                     {
-                        "elements": [
+                        "items": [
                             {
                                 "id": <str>,
                                 "position": {
@@ -244,7 +245,7 @@ class OptimizationResponse(Response):
         """
         data = json.loads(message_data)
         return OptimizationResponse(
-            solutions=[Layout.from_json(solution) for solution in data["solutions"]],
+            solutions=[Layout.from_dict(solution) if isinstance(solution, dict) else Layout.from_json(solution) for solution in data["solutions"]],
         )
 
     def to_json(self) -> str:
@@ -254,7 +255,7 @@ class OptimizationResponse(Response):
             - OptimizationResponse ("o"): {
                 "solutions": [
                     {
-                        "elements": [
+                        "items": [
                             {
                                 "id": <str>,
                                 "position": {
@@ -278,7 +279,7 @@ class OptimizationResponse(Response):
 
         """
         return json.dumps({
-            "solutions": [solution.to_json() for solution in self.solutions],
+            "solutions": [solution.__dict__() for solution in self.solutions],
         })
 
 
@@ -298,9 +299,9 @@ class EvaluationRequest(Request):
 
         The JSON strings for the messages defined here are:
             - EvaluationRequest ("E"): {
-                "layouts": [
+                "items": [
                     {
-                        "elements": [
+                        "items": [
                             {
                                 "id": <str>,
                                 "position": {
@@ -325,17 +326,21 @@ class EvaluationRequest(Request):
         """
         data = json.loads(message_data)
         return EvaluationRequest(
-            layouts=[Layout.from_json(layout) for layout in data["layouts"]],
+            layouts=[Layout.from_dict(layout) if isinstance(layout, dict) else Layout.from_json(layout) for layout in data["items"]],
         )
     
     def to_json(self) -> str:
         """Return a JSON string representing the request data.
 
+        WARNING: This method is incompatible with the from_json method.
+        Example: The following code will not work:
+            >>> assert request == EvaluationRequest.from_json(request.to_json())
+
         The JSON strings for the messages defined here are:
             - EvaluationRequest ("E"): {
-                "layouts": [
+                "items": [
                     {
-                        "elements": [
+                        "items": [
                             {
                                 "id": <str>,
                                 "position": {
@@ -359,7 +364,8 @@ class EvaluationRequest(Request):
 
         """
         return json.dumps({
-            "layouts": [layout.to_json() for layout in self.layouts],
+            "items": [layout.to_json() for layout in self.layouts], # TODO: This is a temporary fix for the issue with the JSON serialization of the Layout class. It should be replaced with the following line once the issue is fixed.
+            # "items": [layout.__dict__() for layout in self.layouts],
         })
 
 

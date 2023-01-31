@@ -9,7 +9,6 @@ from networking.messages import (
     from_json,
 )
 from networking.layout import Layout
-import AUIT
 
 
 def handle_response(response_type, response_data, verbose=False):
@@ -51,6 +50,9 @@ def send_request(socket, request_type, request_data, verbose=False):
 
     # Receive a response
     response = socket.recv_string()
+
+    if verbose:
+        print("Received a response:", response)
 
     # Parse the response
     response_type = response[0]
