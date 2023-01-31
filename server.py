@@ -11,7 +11,7 @@ from networking.messages import (
     from_json,
 )
 from solver import optimize_layout
-
+import AUIT
 
 def handle_request(request_type, request_data, verbose=False):
     """Return a tuple of the response type and the response data."""
