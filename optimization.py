@@ -16,6 +16,7 @@ import client
 import networking.layout
 import networking.element
 from tqdm import tqdm
+import time
 
 # Disable pymoo warnings
 from pymoo.config import Config
@@ -59,7 +60,7 @@ class LayoutProblem(Problem):
         """Initialize the problem."""
         # Calculate the number of variables
         n_variables = (
-            initial_layout.n_elements * 7
+            initial_layout.n_items * 7
         )  # 3 position variables + 4 rotation variables
 
         # TODO: Set the lower and upper bounds:
@@ -127,10 +128,10 @@ class LayoutProblem(Problem):
 
     def _x_to_layout(self, x):
         """Convert the decision variables to a layout."""
-        # Create a list of elements
-        elements = []
+        # Create a list of items
+        items = []
         for i in range(0, len(x), 7):
-            elements.append(
+            items.append(
                 networking.element.Element(
                     position=networking.element.Position(x=x[i], y=x[i + 1], z=x[i + 2]),
                     rotation=networking.element.Rotation(x=x[i + 3], y=x[i + 4], z=x[i + 5], w=x[i + 6]),
@@ -138,14 +139,14 @@ class LayoutProblem(Problem):
             )
 
         # Create and return the layout
-        return networking.layout.Layout(elements=elements)
+        return networking.layout.Layout(items=items)
 
 
 # Function to create an algorithm instance
 def get_algorithm(n_objectives: int):
     """Create an algorithm instance."""
     # set population size
-    pop_size = 1000  # Exp. 1-2: 1000, Exp. 3: 4
+    pop_size = 100  # Exp. 1-2: 1000, Exp. 3: 4
 
     # create the reference directions to be used for the optimization
     # ref_dirs = get_reference_directions(
@@ -182,6 +183,9 @@ def generate_pareto_optimal_layouts(
         reduce: Whether to reduce the Pareto front using the high tradeoff points algorithm.
         plot: Whether to plot the Pareto front.
     """
+    # Start the timer
+    start_time = time.time()
+
     # Create the problem
     problem = LayoutProblem(
         n_objectives=n_objectives,
@@ -213,6 +217,7 @@ def generate_pareto_optimal_layouts(
     if verbose:
         print("Pareto front: %s" % res.F)
         print("Non-dominated solutions: %s" % res.X)
+        print("Elapsed time: %s seconds" % (round(time.time() - start_time, 2)))
 
     # Save the results
     if save:

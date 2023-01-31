@@ -63,7 +63,7 @@ A layout is an object containing a list of UI elements.
 
 ```json
 {
-    "elements": [<Element>, <Element>, ...]
+    "items": [<Element>, <Element>, ...]
 }
 ```
 
@@ -71,7 +71,7 @@ Example layout:
 
 ```json
 {
-  "elements": [
+  "items": [
     {
       "id": "button:1",
       "position": {
@@ -123,7 +123,7 @@ Example optimization request:
   "nObjectives": 3,
   "nConstraints": 2,
   "initialLayout": {
-    "elements": [
+    "items": [
       {
         "id": "button:1",
         "position": {
@@ -173,7 +173,7 @@ Example optimization response:
 {
   "solutions": [
     {
-      "elements": [
+      "items": [
         {
           "id": "button:1",
           "position": {
@@ -205,7 +205,7 @@ Example optimization response:
       ]
     },
     {
-      "elements": [
+      "items": [
         {
           "id": "button:1",
           "position": {
@@ -246,7 +246,7 @@ An evaluation request (message type: `E`) is sent from the Python solver client 
 
 ```json
 {
-    "layouts": [<Layout>, <Layout>, ...]
+    "items": [<Layout>, <Layout>, ...]
 }
 ```
 
@@ -254,9 +254,9 @@ Example evaluation request:
 
 ```json
 {
-  "layouts": [
+  "items": [
     {
-      "elements": [
+      "items": [
         {
           "id": "button:1",
           "position": {
@@ -288,7 +288,7 @@ Example evaluation request:
       ]
     },
     {
-      "elements": [
+      "items": [
         {
           "id": "button:1",
           "position": {

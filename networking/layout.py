@@ -11,18 +11,18 @@ from .element import Element
 class Layout:
     """A layout is a set of UI elements."""
 
-    elements: List[Element]
+    items: List[Element]
 
     def __dict__(self) -> dict:
         """Return a dictionary representation of the layout."""
-        return {"items": [element.__dict__() for element in self.elements]}
+        return {"items": [element.__dict__() for element in self.items]}
 
     def from_dict(data: dict) -> Layout:
         """Return a layout from a dictionary."""
         return Layout(
-            elements=[
-                Element.from_dict(element)
-                for element in data["elements"]
+            items=[
+                Element.from_dict(element) if isinstance(element, dict) else Element.from_json(element)
+                for element in data["items"]
             ]
         )
 
@@ -35,6 +35,6 @@ class Layout:
         return Layout.from_dict(json.loads(data))
 
     @property
-    def n_elements(self) -> int:
-        """Return the number of elements in the layout."""
-        return len(self.elements)
+    def n_items(self) -> int:
+        """Return the number of items in the layout."""
+        return len(self.items)
