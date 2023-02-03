@@ -170,6 +170,67 @@ def get_neck_ergonomics_cost(
 
     return neck_ergonomics_cost
 
+def get_torso_ergonomics_cost(
+    waist_position: networking.element.Position, element: networking.element.Element, verbose: bool = False
+):
+    """
+    Return the torso ergonomics cost of an element for a given waist position.
+
+    The torso ergonomics cost is calculated as the angle between the vector
+    from the waist position to the element and the vector from the waist position
+    to the target's projection on the xz-plane at the waist position's height.
+    If the target is at or above the waist, the torso ergonomics cost is 0.
+    """
+    # Print parameters
+    if verbose:
+        print("Waist at:", waist_position)
+        print("Element at:", element.position)
+
+    # If the element is at or directly under the waist position, return 1
+    if (
+        element.position.x == waist_position.x and
+        element.position.y <= waist_position.y and
+        element.position.z == waist_position.z
+    ):
+        return 1.0
+
+    # If the element is at or above waist level, return 0
+    if element.position.y >= waist_position.y: return 0.0
+
+    # Calculate the vector from the waist position to the element
+    waist_to_element_vector = [
+        element.position.x - waist_position.x,
+        element.position.y - waist_position.y,
+        element.position.z - waist_position.z,
+    ]
+
+    # Calculate the vector from the waist position to the target's projection
+    # on the xz-plane at the waist position's height
+    waist_to_target_projection_vector = [
+        element.position.x - waist_position.x,
+        0.0,
+        element.position.z - waist_position.z,
+    ]
+
+    # Calculate the angle between the two vectors
+    # The angle is the arccos of the ratio of the dot product of the two vectors
+    # and the product of the lengths of the two vectors
+    waist_angle = get_angle_between_vectors(
+        waist_to_element_vector, waist_to_target_projection_vector
+    )
+
+    # If the angle is undefined, return 1
+    if waist_angle == None:
+        if verbose: print("Waist angle is undefined")
+        return 1.0
+
+    # Calculate the torso ergonomics cost normalized to [0, 1]
+    torso_ergonomics_cost = waist_angle / math.pi / 2
+
+    # Print waist angle in degrees
+    if verbose: print(f"Waist angle: {waist_angle * 180 / math.pi}°")
+
+    return torso_ergonomics_cost
 
 def get_arm_ergonomics_cost(
     shoulder_joint_position: networking.element.Position,

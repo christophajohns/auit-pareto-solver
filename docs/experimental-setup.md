@@ -110,7 +110,7 @@ In this scenario, the preference criteria are a superset of the objectives. This
 
 We implement this superset scenario by using the following utility function:
 
-$u(\mathbf{x}) = 1 - (0.33 f_{NE}(\mathbf{x}) + 0.33 f_{SE}(a) + 0.33 f_{TE}(\mathbf{x}))$
+$u(\mathbf{x}) = 1 - (0.33 f_{NE}(\mathbf{x}) + 0.33 f_{SE}(\mathbf{x}) + 0.33 f_{TE}(\mathbf{x}))$
 
 **Objectives**
 - Minimize the neck load (NE)
@@ -128,6 +128,10 @@ If the preference criteria are a subset of the objectives, it means that the pre
 - Minimize the neck load (NE)
 - Minimize the shoulder load (SE)
 
+We implement this subset scenario by using the following utility function:
+
+$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(mathbf{x}))$
+
 **Objectives**
 - Minimize the neck load (NE)
 - Minimize the shoulder load (SE)
@@ -143,6 +147,10 @@ If the preference criteria are disjoint from the objectives, it means that the p
 - Minimize the neck load (NE)
 - Minimize the shoulder load (SE)
 
+We implement this disjoint scenario by using the following utility function:
+
+$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(mathbf{x}))$
+
 **Objectives**
 - Minimize the torso load (TE)
 - Minimize the reachability cost (RE)
@@ -154,6 +162,10 @@ If the preference criteria are equal to the objectives, it means that the prefer
 **Preference Criteria**
 - Minimize the neck load (NE)
 - Minimize the shoulder load (SE)
+
+We implement this equality scenario by using the following utility function:
+
+$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(mathbf{x}))$
 
 **Objectives**
 - Minimize the neck load (NE)
