@@ -64,6 +64,10 @@ $ python tests/test_AUIT.py
 
 Details on the networking between AUIT and the Python solver can be found in the [documentation](docs/protocol.md).
 
+## Experimental Setup
+
+The experimental setup and how to run evaluations is described in the [documentation](docs/experimental-setup.md).
+
 ## References
 
 [1] H. Seada and K. Deb. A unified evolutionary optimization procedure for single, multiple, and many objectives. IEEE Transactions on Evolutionary Computation, 20(3):358–369, June 2016. [doi:10.1109/TEVC.2015.2459718](https://doi.org/10.1109/TEVC.2015.2459718).
