@@ -17,6 +17,8 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 import experiments.user
+import experiments.random_solver
+import experiments.problem
 import AUIT
 
 # Hyperparameters
@@ -125,10 +127,60 @@ def test_utility_functions():
     test_scenario_1_utility()
     test_scenario_2_to_4_utility()
 
+def test_random_solver():
+    """Test random solver."""
+    print("Testing random solver...")
+
+    # Get problem
+    problem = experiments.problem.LayoutProblem(objectives=["neck", "shoulder"], weights=1/2)
+
+    # Test random solver with 1 adaptation
+    single_random_adaptation_layout = experiments.random_solver.get_random_adaptations(problem=problem, n_adaptations=1)
+
+    assert (
+        isinstance(single_random_adaptation_layout, AUIT.networking.layout.Layout)
+    ), "Adaptation should be a layout. Got: {}".format(
+        type(single_random_adaptation_layout)
+    )
+    assert (
+        problem.layout_is_valid(layout=single_random_adaptation_layout)
+    ), "Adaptation should be valid. Got: {}".format(
+        single_random_adaptation_layout
+    )
+    print("Random adaptation layout: {}".format(single_random_adaptation_layout))
+    print()
+
+    # Test random solver with 10 adaptations
+    multiple_random_adaptation_layouts = experiments.random_solver.get_random_adaptations(problem=problem, n_adaptations=10)
+
+    assert (
+        isinstance(multiple_random_adaptation_layouts, list)
+    ), "Adaptations should be a list. Got: {}".format(
+        type(multiple_random_adaptation_layouts)
+    )
+
+    for adaptation in multiple_random_adaptation_layouts:
+        assert (
+            isinstance(adaptation, AUIT.networking.layout.Layout)
+        ), "Adaptation should be a layout. Got: {}".format(
+            type(adaptation)
+        )
+        assert (
+            problem.layout_is_valid(layout=adaptation)
+        ), "Adaptation should be valid. Got: {}".format(
+            single_random_adaptation_layout
+        )
+
+    print("Random adaptation layouts: {} layouts".format(len(multiple_random_adaptation_layouts)))
+    print()
+
+
+
 
 def test_evaluation():
     """Test evaluations."""
     test_utility_functions()
+    test_random_solver()
 
 
 def main():
