@@ -130,7 +130,7 @@ If the preference criteria are a subset of the objectives, it means that the pre
 
 We implement this subset scenario by using the following utility function:
 
-$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(mathbf{x}))$
+$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(\mathbf{x}))$
 
 **Objectives**
 - Minimize the neck load (NE)
@@ -149,7 +149,7 @@ If the preference criteria are disjoint from the objectives, it means that the p
 
 We implement this disjoint scenario by using the following utility function:
 
-$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(mathbf{x}))$
+$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(\mathbf{x}))$
 
 **Objectives**
 - Minimize the torso load (TE)
@@ -165,7 +165,7 @@ If the preference criteria are equal to the objectives, it means that the prefer
 
 We implement this equality scenario by using the following utility function:
 
-$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(mathbf{x}))$
+$u(\mathbf{x}) = 1 - (0.5 f_{NE}(\mathbf{x}) + 0.5 f_{SE}(\mathbf{x}))$
 
 **Objectives**
 - Minimize the neck load (NE)

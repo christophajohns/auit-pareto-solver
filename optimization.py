@@ -142,17 +142,14 @@ class LayoutProblem(Problem):
         return networking.layout.Layout(items=items)
 
 
-# Function to create an algorithm instance
-def get_algorithm(n_objectives: int):
+# Function to create an algorithm instance (pop size: Exp. 1-2: 1000, Exp. 3: 4)
+def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
     """Create an algorithm instance."""
-    # set population size
-    pop_size = 100  # Exp. 1-2: 1000, Exp. 3: 4
-
     # create the reference directions to be used for the optimization
     # ref_dirs = get_reference_directions(
     #     "uniform", n_objectives, n_partitions=pop_size
     # )  # Exp. 3
-    ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=1)
+    ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=seed)
 
     # create the algorithm object
     # algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 1-3

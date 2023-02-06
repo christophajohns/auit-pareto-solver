@@ -82,12 +82,7 @@ class LayoutProblem(Problem):
         # only the value of the costs for each layout's costs
         costs = np.array(
             [
-                [
-                    sum([
-                        get_cost(item) for get_cost in self.objective_functions
-                    ])
-                    for item in layout.items
-                ]
+                get_cost(layout) for get_cost in self.objective_functions
                 for layout in layouts
             ]
         )
