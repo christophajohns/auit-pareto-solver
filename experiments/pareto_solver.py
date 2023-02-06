@@ -25,6 +25,8 @@ from optimization import PrintProgress, get_algorithm
 from pymoo.termination import get_termination
 from pymoo.optimize import minimize
 from pymoo.decomposition.aasf import AASF
+from pymoo.decomposition.weighted_sum import WeightedSum
+from pymoo.core.result import Result as PymooResult
 
 
 class ParetoSolver(Solver):
@@ -37,8 +39,8 @@ class ParetoSolver(Solver):
         self.pop = pop
         self.n_gen = n_gen
 
-    def get_adaptations(self, decomposition: Optional[Literal['full', 'aasf']] = None, verbose: bool = False) -> Union[networking.layout.Layout, list[networking.layout.Layout]]:
-        """Returns one or multiple Pareto optimal adaptations in the design space defined in the problem."""
+    def _get_solutions(self, verbose: bool = False) -> PymooResult:
+        """Returns the Pareto front of the problem."""
         # Create the algorithm
         algorithm = get_algorithm(self.problem.n_obj, pop_size=self.pop, seed=self.seed)
 
@@ -57,6 +59,13 @@ class ParetoSolver(Solver):
             copy_algorithm=False,
         )
 
+        return res
+
+    def get_adaptations(self, decomposition: Optional[Literal['full', 'aasf', 'ws']] = None, verbose: bool = False) -> list[networking.layout.Layout]:
+        """Returns one or multiple Pareto optimal adaptations in the design space defined in the problem."""
+        # Get the Pareto front
+        res = self._get_solutions(verbose=verbose)
+
         # If a single global optimum is found, return it
         if res.F.shape[0] == 1:
             if (
@@ -69,15 +78,22 @@ class ParetoSolver(Solver):
         # If no decomposition is requested, return all the Pareto optimal layouts
         if not decomposition:
             return [self.problem._x_to_layout(x) for x in res.X]
+
+        # If weighted sum decomposition is requested, return the Pareto optimal layout decomposed via an equally weighted sum
+        if decomposition == 'ws':
+            decomp = WeightedSum()
+            equal_weights = np.ones(self.problem.n_obj) / self.problem.n_obj
+            equal_weight_layout_ws = self.problem._x_to_layout(res.X[decomp.do(res.F, weights=equal_weights).argmin()])
+            return [equal_weight_layout_ws]
         
         # Otherwise, set up AASF decomposition
         decomp = AASF(eps=0.0, beta=25)
         equal_weights = np.ones(self.problem.n_obj) / self.problem.n_obj
-        equal_weight_layout = self.problem._x_to_layout(res.X[decomp.do(res.F, weights=equal_weights).argmin()])
+        equal_weight_layout_aasf = self.problem._x_to_layout(res.X[decomp.do(res.F, weights=equal_weights).argmin()])
 
         # If full decomposition is requested, return the Pareto optimal layout decomposed via equally weighted AASF
         if decomposition == 'full':
-            return equal_weight_layout
+            return [equal_weight_layout_aasf]
 
         # If AASF decomposition is requested, return Pareto optimal layouts decomposed via AASF
         # Return the equally weighted layout and single-objective layouts
@@ -85,7 +101,7 @@ class ParetoSolver(Solver):
         single_obj_weights = np.zeros((self.problem.n_obj, self.problem.n_obj))
         for i in range(self.problem.n_obj):
             single_obj_weights[i, i] = 1
-        return [equal_weight_layout] + [
+        return [equal_weight_layout_aasf] + [
             self.problem._x_to_layout(res.X[decomp.do(res.F, weights=weights).argmin()])
             for weights in single_obj_weights
         ]

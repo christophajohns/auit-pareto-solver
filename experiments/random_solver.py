@@ -19,7 +19,6 @@ sys.path.append(parent)
 from .problem import LayoutProblem
 import numpy as np
 import networking.layout
-from typing import Union
 from .solver import Solver
 
 class RandomSolver(Solver):
@@ -30,11 +29,11 @@ class RandomSolver(Solver):
         super().__init__(problem)
         self.rng = np.random.default_rng(seed)
 
-    def get_adaptations(self, n_adaptations: int = 1) -> Union[networking.layout.Layout, list[networking.layout.Layout]]:
+    def get_adaptations(self, n_adaptations: int = 1) -> list[networking.layout.Layout]:
         """Returns one or multiple random adaptations in the design space defined in the problem."""
         random_adaptations = self.problem.xl + self.rng.random((n_adaptations, self.problem.n_var)) * (
             self.problem.xu - self.problem.xl
         )
         if n_adaptations == 1:
-            return self.problem._x_to_layout(random_adaptations[0])
+            return [self.problem._x_to_layout(random_adaptations[0])]
         return [self.problem._x_to_layout(x) for x in random_adaptations]

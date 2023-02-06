@@ -18,7 +18,6 @@ sys.path.append(parent)
 
 from .problem import LayoutProblem
 import networking.layout
-from typing import Union
 
 class Solver:
     """An abstract solver for the layout problem."""
@@ -27,6 +26,6 @@ class Solver:
         """Initialize the solver."""
         self.problem = problem
 
-    def get_adaptations(self) -> Union[networking.layout.Layout, list[networking.layout.Layout]]:
-        """Returns one or multiple adaptations in the design space defined in the problem."""
+    def get_adaptations(self) -> list[networking.layout.Layout]:
+        """Returns a list with one or multiple adaptations in the design space defined in the problem."""
         raise NotImplementedError

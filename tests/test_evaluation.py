@@ -19,6 +19,7 @@ sys.path.append(parent)
 import experiments.user
 import experiments.random_solver
 import experiments.pareto_solver
+import experiments.weighted_sum_solver
 import experiments.problem
 import AUIT
 import numpy as np
@@ -146,7 +147,7 @@ def test_random_solver():
     random_solver = experiments.random_solver.RandomSolver(problem=problem, seed=42)
 
     # Test random solver with 1 adaptation
-    single_random_adaptation_layout = random_solver.get_adaptations(n_adaptations=1)
+    single_random_adaptation_layout = random_solver.get_adaptations(n_adaptations=1)[0]
 
     assert (
         isinstance(single_random_adaptation_layout, AUIT.networking.layout.Layout)
@@ -351,7 +352,7 @@ def test_pareto_solver():
     # Create a solver
     pareto_solver = experiments.pareto_solver.ParetoSolver(problem=problem, pop=100, n_gen=100, seed=42)
     # Test getting a single adaptation solution
-    pareto_optimal_adaptation = pareto_solver.get_adaptations(decomposition="full", verbose=True)
+    pareto_optimal_adaptation = pareto_solver.get_adaptations(decomposition="full", verbose=True)[0]
     assert (
         isinstance(pareto_optimal_adaptation, AUIT.networking.layout.Layout)
     ), "Adaptation should be a layout. Got: {}".format(
@@ -391,6 +392,22 @@ def test_pareto_solver():
     print("Pareto optimal adaptation layouts (n_obj+1 AASF): {}".format(pareto_optimal_adaptations_aasf))
     print()
 
+    # Test getting multiple adaptation solutions (WS)
+    pareto_optimal_adaptation_ws = pareto_solver.get_adaptations(decomposition="ws", verbose=True)[0]
+    assert (
+        isinstance(pareto_optimal_adaptation_ws, AUIT.networking.layout.Layout)
+    ), "Adaptation should be a layout. Got: {}".format(
+        type(pareto_optimal_adaptation_ws)
+    )
+    assert (
+        problem.layout_is_valid(layout=pareto_optimal_adaptation_ws)
+    ), "Adaptation should be valid. Got: {}".format(
+        pareto_optimal_adaptation_ws
+    )
+    print("Pareto optimal adaptation layout (WS): {}".format(pareto_optimal_adaptation_ws))
+    print()
+
+
     # Test getting multiple adaptation solutions (whole Pareto front)
     pareto_front_adaptations = pareto_solver.get_adaptations(decomposition=None, verbose=True)
     assert (
@@ -412,7 +429,28 @@ def test_pareto_solver():
     print("Pareto front adaptation layouts: {} layouts".format(len(pareto_front_adaptations)))
     print()
 
-
+def test_weighted_sum_solver():
+    """Test weighted sum solver."""
+    # Create a problem
+    problem = experiments.problem.LayoutProblem(
+        objectives=["neck", "shoulder"]
+    )
+    # Create a solver
+    weighted_sum_solver = experiments.weighted_sum_solver.WeightedSumSolver(problem=problem, weights=1/problem.n_obj, pop=100, n_gen=100, seed=42)
+    # Test getting a single adaptation solution
+    weighted_sum_adaptation = weighted_sum_solver.get_adaptations(verbose=True)[0]
+    assert (
+        isinstance(weighted_sum_adaptation, AUIT.networking.layout.Layout)
+    ), "Adaptation should be a layout. Got: {}".format(
+        type(weighted_sum_adaptation)
+    )
+    assert (
+        problem.layout_is_valid(layout=weighted_sum_adaptation)
+    ), "Adaptation should be valid. Got: {}".format(
+        weighted_sum_adaptation
+    )
+    print("Weighted sum adaptation layout: {}".format(weighted_sum_adaptation))
+    print()
 
 
 
@@ -421,6 +459,7 @@ def test_evaluation():
     test_utility_functions()
     test_random_solver()
     test_problem()
+    test_weighted_sum_solver()
     test_pareto_solver()
 
 
