@@ -67,6 +67,7 @@ Details on the networking between AUIT and the Python solver can be found in the
 ## Experimental Setup
 
 The experimental setup and how to run evaluations is described in the [documentation](docs/experimental-setup.md).
+The results of the evaluations can be viewed and replicated using the [Jupyter notebook](evaluation.ipynb).
 
 ## References
 
