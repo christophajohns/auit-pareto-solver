@@ -415,6 +415,11 @@ def test_pareto_solver():
     ), "Adaptations should be a list. Got: {}".format(
         type(pareto_front_adaptations)
     )
+    assert (
+        len(pareto_front_adaptations) > 0
+    ), "Adaptations should have more than 0 elements. Got: {}".format(
+        len(pareto_front_adaptations)
+    )
     for adaptation in pareto_front_adaptations:
         assert (
             isinstance(adaptation, AUIT.networking.layout.Layout)
