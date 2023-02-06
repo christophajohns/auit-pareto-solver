@@ -20,6 +20,7 @@ import experiments.user
 import experiments.random_solver
 import experiments.pareto_solver
 import experiments.weighted_sum_solver
+import experiments.single_objectives_solver
 import experiments.problem
 import AUIT
 import numpy as np
@@ -457,13 +458,46 @@ def test_weighted_sum_solver():
     print("Weighted sum adaptation layout: {}".format(weighted_sum_adaptation))
     print()
 
-
+def test_multiple_single_objectives_solver():
+    """Test multiple single objectives solver."""
+    # Create a problem
+    problem = experiments.problem.LayoutProblem(
+        objectives=["neck", "shoulder"]
+    )
+    # Create a solver
+    multiple_single_objectives_solver = experiments.single_objectives_solver.SingleObjectivesSolver(problem=problem, pop=100, n_gen=100, seed=42)
+    # Test getting the adaptations representing the single objective solutions
+    single_objectives_adaptations = multiple_single_objectives_solver.get_adaptations(verbose=True)
+    assert (
+        isinstance(single_objectives_adaptations, list)
+    ), "Adaptations should be a list. Got: {}".format(
+        type(single_objectives_adaptations)
+    )
+    assert (
+        len(single_objectives_adaptations) == problem.n_obj
+    ), "Adaptations should have n_obj elements. Got: {}".format(
+        len(single_objectives_adaptations)
+    )
+    for adaptation in single_objectives_adaptations:
+        assert (
+            isinstance(adaptation, AUIT.networking.layout.Layout)
+        ), "Adaptation should be a layout. Got: {}".format(
+            type(adaptation)
+        )
+        assert (
+            problem.layout_is_valid(layout=adaptation)
+        ), "Adaptation should be valid. Got: {}".format(
+            adaptation
+        )
+    print("Single objective adaptation layouts: {}".format(single_objectives_adaptations))
+    print()
 
 def test_evaluation():
     """Test evaluations."""
     test_utility_functions()
     test_random_solver()
     test_problem()
+    test_multiple_single_objectives_solver()
     test_weighted_sum_solver()
     test_pareto_solver()
 
