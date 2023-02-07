@@ -2,14 +2,14 @@
 
 This document describes the experimental setup used to evaluate the Pareto solver. In particular, it describes how to run the evaluations and how to reproduce the results presented in the paper.
 
-We evaluate the Pareto solver against the following baselines:
+We evaluate the Pareto solver against the following **baselines**:
 - Static weighted sum solver (WS)
 - Multiple single-objective solvers (MSO)
 - Random solver (RND)
 
 Each of the baselines is described in more detail below and in the paper.
 
-We compare the Pareto solver against the baselines using a set of four different scenarios. Each scenario features a computational user model and a set of objectives. Their relationship is described by a utility function. The preference criteria in the utility function and their combinations determine the scenarios. Each scenario features two or three objectives/preference criteria based on RULA workplace ergonomics. The scenarios are:
+We compare the Pareto solver against the baselines using a set of four different **scenarios**. Each scenario features a computational user model and a set of objectives. Their relationship is described by a utility function. The preference criteria in the utility function and their combinations determine the scenarios. Each scenario features two or three objectives/preference criteria based on RULA workplace ergonomics. The scenarios are:
 - Scenario 1: Preference criteria are superset of objectives (SUP)
 - Scenario 2: Preference criteria are subset of objectives (SUB)
 - Scenario 3: Preference criteria are disjoint from objectives (DIS)
