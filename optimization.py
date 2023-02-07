@@ -147,7 +147,7 @@ def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
     """Create an algorithm instance."""
     # create the reference directions to be used for the optimization
     # ref_dirs = get_reference_directions(
-    #     "uniform", n_objectives, n_partitions=pop_size
+    #     "uniform", n_objectives, n_partitions=pop_size-1, seed=seed
     # )  # Exp. 3
     ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=seed)
 
