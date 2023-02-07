@@ -458,6 +458,20 @@ def test_weighted_sum_solver():
     print("Weighted sum adaptation layout: {}".format(weighted_sum_adaptation))
     print()
 
+    # Test Nelder Mead algorithm for weighted sum solver
+    weighted_sum_solver = experiments.weighted_sum_solver.WeightedSumSolver(problem=problem, weights=1/problem.n_obj, pop=100, n_gen=100, seed=42, algo="nm")
+    weighted_sum_adaptation_nm = weighted_sum_solver.get_adaptations(verbose=True)[0]
+    assert (
+        isinstance(weighted_sum_adaptation_nm, AUIT.networking.layout.Layout)
+    ), "Adaptation should be a layout. Got: {}".format(
+        type(weighted_sum_adaptation_nm)
+    )
+    assert (
+        problem.layout_is_valid(layout=weighted_sum_adaptation_nm)
+    ), "Adaptation should be valid. Got: {}".format(
+        weighted_sum_adaptation_nm
+    )
+
 def test_multiple_single_objectives_solver():
     """Test multiple single objectives solver."""
     # Create a problem

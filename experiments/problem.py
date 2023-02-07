@@ -20,7 +20,7 @@ import numpy as np
 from pymoo.core.problem import Problem
 import networking.layout
 import networking.element
-from typing import Callable
+from typing import Callable, Union, Optional
 from .config import OBJECTIVE, OBJECTIVE_FUNCTIONS
 
 
@@ -67,6 +67,7 @@ class LayoutProblem(Problem):
         )
 
         # Store the objective functions
+        self.objectives = objectives
         self.objective_functions = [
             get_objective_function(objective=objective)
             for objective in objectives
@@ -130,3 +131,50 @@ class LayoutProblem(Problem):
         """Check if the layout is valid."""
         # Check if the layout is in the design space
         return self.is_valid(self._layout_to_x(layout))
+
+    def get_soo_problem(self, weights: Optional[Union[list[float], float]] = None) -> Problem:
+        """Return a single-objective optimization problem by linearly combining the objectives
+        with the specified weights."""
+        # If weights is a single float, convert it to a list
+        if isinstance(weights, float):
+            weights = [weights] * len(self.objective_functions)
+        
+        # If weights is None, set it to a list of ones
+        if weights is None:
+            weights = [1/len(self.objective_functions)] * len(self.objective_functions)
+
+        # Create a new problem
+        problem = LayoutProblem(objectives=[self.objectives[0]])
+        # Give the problem access to the same objective functions
+        problem.objectives = self.objectives
+        problem.objective_functions = self.objective_functions
+
+        # Define the new evaluation function
+        def _evaluate(self, x: np.ndarray, out, *args, **kwargs):
+            """Evaluate the problem."""
+            # Convert the decision variables to a list of layouts
+            layouts = [self._x_to_layout(x[i]) for i in range(x.shape[0])]
+
+            # Evaluate the layouts
+            # Transform costs to a numpy array by storing
+            # only the value of the costs for each layout's costs
+            costs = np.array(
+                [
+                    sum(
+                        [
+                            weights[i] * self.objective_functions[i](layout)
+                            for i in range(len(self.objective_functions))
+                        ]
+                    )
+                    for layout in layouts
+                ]
+            )
+
+            # Set the objectives
+            out["F"] = costs
+
+        # Set the new evaluation function
+        problem._evaluate = _evaluate.__get__(problem, LayoutProblem)
+
+        # Return the new problem
+        return problem
