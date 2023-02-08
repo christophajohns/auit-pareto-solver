@@ -159,11 +159,14 @@ Example optimization request:
 
 ## Optimization Response
 
-An optimization response (message type: `o`) is sent by the solver to the AUIT server with a set of Pareto optimal solutions for a given set of objectives and constraints.
+An optimization response (message type: `o`) is sent by the solver to the AUIT server with a set of Pareto optimal solutions for a given set of objectives and constraints, as well as a suggestion for the next active adaptation.
 
 ```json
 {
-    "solutions": [<Layout>, <Layout>, ...]
+    "solutions": {
+      "items": [<Layout>, <Layout>, ...]
+    },
+    "default": <Layout>
 }
 ```
 
@@ -171,72 +174,106 @@ Example optimization response:
 
 ```json
 {
-  "solutions": [
-    {
-      "items": [
-        {
-          "id": "button:1",
-          "position": {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0
+  "solutions": {
+    "items": [
+      {
+        "items": [
+          {
+            "id": "button:1",
+            "position": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0,
+              "w": 1.0
+            }
           },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
+          {
+            "id": "button:2",
+            "position": {
+              "x": 2.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0,
+              "w": 1.0
+            }
           }
+        ]
+      },
+      {
+        "items": [
+          {
+            "id": "button:1",
+            "position": {
+              "x": 2.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0,
+              "w": 1.0
+            }
+          },
+          {
+            "id": "button:2",
+            "position": {
+              "x": 3.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0,
+              "w": 1.0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "default": {
+    "items": [
+      {
+        "id": "button:1",
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
         },
-        {
-          "id": "button:2",
-          "position": {
-            "x": 2.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          }
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0,
+          "w": 1.0
         }
-      ]
-    },
-    {
-      "items": [
-        {
-          "id": "button:1",
-          "position": {
-            "x": 2.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          }
+      },
+      {
+        "id": "button:2",
+        "position": {
+          "x": 1.0,
+          "y": 0.0,
+          "z": 0.0
         },
-        {
-          "id": "button:2",
-          "position": {
-            "x": 3.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-            "w": 1.0
-          }
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0,
+          "w": 1.0
         }
-      ]
-    }
-  ]
+      }
+    ]
+  }
 }
 ```
 
