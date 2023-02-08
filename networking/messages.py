@@ -210,6 +210,12 @@ class OptimizationResponse(Response):
 
     solutions: List[Layout]
 
+    @property
+    def default(self) -> Layout:
+        """Return the default solution."""
+        # TODO: This should be the AASF equal weight compromise solution.
+        return self.solutions[0] if len(self.solutions) > 0 else None
+
     def from_json(message_data: str) -> OptimizationResponse:
         """Return an optimization response from a JSON string.
 
@@ -244,8 +250,18 @@ class OptimizationResponse(Response):
 
         """
         data = json.loads(message_data)
+        default_layout = None
+        if "default" in data:
+            default_layout = Layout.from_dict(data["default"]) \
+                if type(data["default"]) is dict \
+                else Layout.from_json(data["default"])
+        else:
+            default_layout = Layout.from_dict(data["solutions"][0]) \
+                if type(data["solutions"][0]) is dict \
+                else Layout.from_json(data["solutions"][0])
         return OptimizationResponse(
             solutions=[Layout.from_dict(solution) if isinstance(solution, dict) else Layout.from_json(solution) for solution in data["solutions"]],
+            default=default_layout
         )
 
     def to_json(self) -> str:
@@ -280,6 +296,7 @@ class OptimizationResponse(Response):
         """
         return json.dumps({
             "solutions": [solution.__dict__() for solution in self.solutions],
+            "default": self.default.__dict__(),
         })
 
 

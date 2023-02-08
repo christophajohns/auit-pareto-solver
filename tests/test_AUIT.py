@@ -3,7 +3,6 @@
 # Load the AUIT module
 import sys
 import os
-import math
 
 # getting the name of the directory
 # where the this file is present.
