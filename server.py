@@ -30,7 +30,7 @@ def handle_request(request_type, request_data, verbose=False):
             request_data.n_constraints,
             request_data.initial_layout,
         )
-        return "o", OptimizationResponse(solutions=solutions)
+        return "o", OptimizationResponse(items=solutions)
     if request_type == "P":
         if verbose: print("Received a Problem Layout")
         return "h", None

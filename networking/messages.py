@@ -208,7 +208,7 @@ class OptimizationResponse(Response):
     """An optimization response is a response sent from the solver to AUIT
     that contains the Pareto optimal solutions to the layout optimization problem."""
 
-    solutions: List[Layout]
+    items: List[Layout]
 
     def from_json(message_data: str) -> OptimizationResponse:
         """Return an optimization response from a JSON string.
@@ -245,7 +245,7 @@ class OptimizationResponse(Response):
         """
         data = json.loads(message_data)
         return OptimizationResponse(
-            solutions=[Layout.from_dict(solution) if isinstance(solution, dict) else Layout.from_json(solution) for solution in data["solutions"]],
+            items=[Layout.from_dict(solution) if isinstance(solution, dict) else Layout.from_json(solution) for solution in data["solutions"]],
         )
 
     def to_json(self) -> str:
@@ -279,7 +279,7 @@ class OptimizationResponse(Response):
 
         """
         return json.dumps({
-            "solutions": [solution.__dict__() for solution in self.solutions],
+            "items": [solution.to_json() for solution in self.items],
         })
 
 
