@@ -219,7 +219,7 @@ class OptimizationResponse(Response):
 
         The JSON strings for the messages defined here are:
             - OptimizationResponse ("o"): {
-                "solutions": [
+                "solutions": {"items": [
                     {
                         "items": [
                             {
@@ -228,7 +228,7 @@ class OptimizationResponse(Response):
                                     "x": <float>,
                                     "y": <float>,
                                     "z": <float>,
-                                }
+                                },
                                 "rotation": {
                                     "x": <float>,
                                     "y": <float>,
@@ -240,7 +240,26 @@ class OptimizationResponse(Response):
                         ],
                     },
                     ...
-                ],
+                ]},
+                "default": {
+                    "items": [
+                        {
+                            "id": <str>,
+                            "position": {
+                                "x": <float>,
+                                "y": <float>,
+                                "z": <float>,
+                            },
+                            "rotation": {
+                                "x": <float>,
+                                "y": <float>,
+                                "z": <float>,
+                                "w": <float>,
+                            }
+                        },
+                        ...
+                    ],
+                },
             }
 
         """
@@ -251,11 +270,11 @@ class OptimizationResponse(Response):
                 if type(data["default"]) is dict \
                 else Layout.from_json(data["default"])
         else:
-            default_layout = Layout.from_dict(data["solutions"][0]) \
-                if type(data["solutions"][0]) is dict \
-                else Layout.from_json(data["solutions"][0])
+            default_layout = Layout.from_dict(data["solutions"]["items"][0]) \
+                if type(data["solutions"]["items"][0]) is dict \
+                else Layout.from_json(data["solutions"]["items"][0])
         return OptimizationResponse(
-            solutions=[Layout.from_dict(solution) if isinstance(solution, dict) else Layout.from_json(solution) for solution in data["solutions"]],
+            solutions=[Layout.from_dict(solution) if isinstance(solution, dict) else Layout.from_json(solution) for solution in data["solutions"]["items"]],
             default=default_layout
         )
 
@@ -264,7 +283,7 @@ class OptimizationResponse(Response):
 
         The JSON strings for the messages defined here are:
             - OptimizationResponse ("o"): {
-                "solutions": [
+                "solutions": {"items": [
                     {
                         "items": [
                             {
@@ -285,12 +304,31 @@ class OptimizationResponse(Response):
                         ],
                     },
                     ...
-                ],
+                ]},
+                "default": {
+                    "items": [
+                        {
+                            "id": <str>,
+                            "position": {
+                                "x": <float>,
+                                "y": <float>,
+                                "z": <float>,
+                            },
+                            "rotation": {
+                                "x": <float>,
+                                "y": <float>,
+                                "z": <float>,
+                                "w": <float>,
+                            }
+                        },
+                        ...
+                    ],
+                },
             }
 
         """
         return json.dumps({
-            "solutions": [solution.__dict__() for solution in self.solutions],
+            "solutions": {"items": [solution.__dict__() for solution in self.solutions]},
             "default": self.default.__dict__(),
         })
 
