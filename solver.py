@@ -12,21 +12,22 @@ import networking.layout
 
 def optimize_layout(
     n_objectives: int, n_constraints: int, initial_layout: networking.layout.Layout
-):
-    """Return the Pareto optimal solutions to the layout optimization problem."""
+) -> tuple[list[networking.layout.Layout], networking.layout.Layout]:
+    """Return the Pareto optimal solutions to the layout optimization problem
+    and a default layout."""
     # Create a context and a socket
     AUIT_PORT = 5556
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
     socket.connect(f"tcp://localhost:{AUIT_PORT}")
 
-    # Generate the Pareto optimal layouts
-    layouts = optimization.generate_pareto_optimal_layouts(
+    # Generate the Pareto optimal layouts and the default layout
+    layouts, default_layout = optimization.generate_pareto_optimal_layouts_and_default(
         n_objectives, n_constraints, initial_layout, socket
     )
 
     # Return the Pareto optimal solutions
-    return layouts
+    return layouts, default_layout
 
 
 def main():

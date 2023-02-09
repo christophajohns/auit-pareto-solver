@@ -209,12 +209,7 @@ class OptimizationResponse(Response):
     that contains the Pareto optimal solutions to the layout optimization problem."""
 
     solutions: List[Layout]
-
-    @property
-    def default(self) -> Layout:
-        """Return the default solution."""
-        # TODO: This should be the AASF equal weight compromise solution.
-        return self.solutions[0] if len(self.solutions) > 0 else None
+    default: Layout
 
     def from_json(message_data: str) -> OptimizationResponse:
         """Return an optimization response from a JSON string.

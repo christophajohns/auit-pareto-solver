@@ -1,6 +1,7 @@
 """Classes and functions for the multi-objective optimization of layouts."""
 
 import numpy as np
+from pymoo.core.result import Result
 from pymoo.core.problem import Problem
 from pymoo.core.callback import Callback
 from pymoo.algorithms.moo.nsga3 import NSGA3
@@ -11,6 +12,7 @@ from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.termination import get_termination
 from pymoo.optimize import minimize
 from pymoo.mcdm.high_tradeoff import HighTradeoffPoints
+from pymoo.decomposition.aasf import AASF
 from pymoo.visualization.scatter import Scatter
 import client
 import networking.layout
@@ -161,7 +163,7 @@ def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
 
 
 # Function to generate the Pareto optimal layouts (i.e., the Pareto front)
-def generate_pareto_optimal_layouts(
+def generate_pareto_optimal_layouts_and_default(
     n_objectives: int,
     n_constraints: int,
     initial_layout: networking.layout.Layout,
@@ -170,8 +172,8 @@ def generate_pareto_optimal_layouts(
     plot=False,
     save=False,
     verbose=True,
-):
-    """Generate the Pareto optimal layouts.
+) -> tuple[list[networking.layout.Layout], networking.layout.Layout]:
+    """Generate the Pareto optimal layouts and a default layout as a compromise solution.
 
     Args:
         n_objectives: The number of objectives.
@@ -236,9 +238,11 @@ def generate_pareto_optimal_layouts(
         if (
             res.X.shape[0] == 1
         ):  # If the array is 1D (i.e., single-objective; e.g., res.X: [-2.1 -2.4 13.4  0.1  0.8  0.4  0.6])
-            return [problem._x_to_layout(res.X[0])]
+            single_optimal_layout = problem._x_to_layout(res.X[0])
+            return [single_optimal_layout], single_optimal_layout
         # else if the array is 2D (i.e., multi-objective; e.g., res.X: [[-2.1 -2.4 13.4  0.1  0.8  0.4  0.6]])
-        return [problem._x_to_layout(res.X)]
+        single_optimal_layout = problem._x_to_layout(res.X)
+        return [single_optimal_layout], single_optimal_layout
 
     # If the reduce flag is set to True...
     if reduce:
@@ -256,11 +260,30 @@ def generate_pareto_optimal_layouts(
             scatterplot.show()
 
         # Return the Pareto optimal layouts
-        return [problem._x_to_layout(x) for x in res.X[points_of_interest]]
+        pareto_optimal_layouts = [problem._x_to_layout(x) for x in res.X[points_of_interest]]
+        # Determine the AASF equal weights layout
+        default_layout = get_aasf_equal_weights_layout(problem, res)
+        return pareto_optimal_layouts, default_layout
 
     # If the Pareto front should be plotted, plot it
     if plot:
         scatterplot.show()
 
     # Otherwise, return all the Pareto optimal layouts
-    return [problem._x_to_layout(x) for x in res.X]
+    pareto_optimal_layouts = [problem._x_to_layout(x) for x in res.X]
+    # Determine the AASF equal weights layout
+    default_layout = get_aasf_equal_weights_layout(problem, res)
+    return pareto_optimal_layouts, default_layout
+
+
+def get_aasf_equal_weights_layout(problem: LayoutProblem, res: Result) -> networking.layout.Layout:
+    """Determine the AASF equal weights layout given the optimization results.
+
+    Args:
+        res: The optimization results.
+    """
+    aasf = AASF(eps=0, beta=5)
+    equal_weights = np.ones(res.F.shape[1] if res.F.ndim == 2 else len(res.F))
+    compromise_point = res.X[aasf.do(res.F, weights=equal_weights).argmin()]
+    aasf_equal_weights_layout = problem._x_to_layout(compromise_point)
+    return aasf_equal_weights_layout

@@ -22,11 +22,10 @@ from tests.test_evaluation import get_layout_with_element_at_eye_level
 
 def test_optimization_response():
     """Test the OptimizationResponse class."""
-    # Test whether the OptimizationResponse class has a value for the "default" attribute
-    # Construct a list of Layout objects
+    # Test whether OptimizationResponses have a default value for the "default" attribute
     layout = get_layout_with_element_at_eye_level()
     solutions = [layout]
-    optimization_response = OptimizationResponse(solutions=solutions)
+    optimization_response = OptimizationResponse(solutions=solutions, default=layout)
     assert optimization_response.solutions == solutions
     assert optimization_response.default == layout
 

@@ -25,12 +25,12 @@ def handle_request(request_type, request_data, verbose=False):
         if verbose:
             print("Received an OptimizationRequest")
             print("request_data:", request_data)
-        solutions = optimize_layout(
+        solutions, default_layout = optimize_layout(
             request_data.n_objectives,
             request_data.n_constraints,
             request_data.initial_layout,
         )
-        return "o", OptimizationResponse(solutions=solutions)
+        return "o", OptimizationResponse(solutions=solutions, default=default_layout)
     if request_type == "P":
         if verbose: print("Received a Problem Layout")
         return "h", None

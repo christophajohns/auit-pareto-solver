@@ -337,15 +337,15 @@ def evaluate_layouts(layouts: List[networking.layout.Layout]):
         [
             # sum(
             #     get_hand_reachability_cost(hand_position, element)
-            #     for element in layout.elements
+            #     for element in layout.items
             # ),  # hand reachability cost
             sum(
                 get_arm_ergonomics_cost(shoulder_joint_position, element)
-                for element in layout.elements
+                for element in layout.items
             ),  # arm ergonomics cost
             sum(
                 get_neck_ergonomics_cost(eye_position, element)
-                for element in layout.elements
+                for element in layout.items
             ),  # neck ergonomics cost
         ]
         for layout in layouts
@@ -356,7 +356,7 @@ def evaluate_layouts(layouts: List[networking.layout.Layout]):
         [
             sum(
                 get_at_arms_length_cost(shoulder_joint_position, arm_length, element)
-                for element in layout.elements
+                for element in layout.items
             ),  # at-arms-length cost
         ]
         for layout in layouts
@@ -380,7 +380,7 @@ def main():
     n_objectives = 2
     n_constraints = 1
     layout = networking.layout.Layout(
-        elements=[
+        items=[
             networking.element.Element(
                 id="1",
                 position=networking.element.Position(x=14, y=2, z=7),
