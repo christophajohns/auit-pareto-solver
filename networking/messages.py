@@ -328,8 +328,8 @@ class OptimizationResponse(Response):
 
         """
         return json.dumps({
-            "solutions": {"items": [solution.__dict__() for solution in self.solutions]},
-            "suggested": self.suggested.__dict__(),
+            "solutions": json.dumps({"items": [solution.to_json() for solution in self.solutions]}), # Required for compatibility with AUIT desearialization
+            "suggested": self.suggested.to_json(),
         })
 
 
