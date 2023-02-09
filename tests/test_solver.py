@@ -22,12 +22,12 @@ from tests.test_evaluation import get_layout_with_element_at_eye_level
 
 def test_optimization_response():
     """Test the OptimizationResponse class."""
-    # Test whether OptimizationResponses have a default value for the "default" attribute
+    # Test whether OptimizationResponses have a suggested value for the "suggested" attribute
     layout = get_layout_with_element_at_eye_level()
     solutions = [layout]
-    optimization_response = OptimizationResponse(solutions=solutions, default=layout)
+    optimization_response = OptimizationResponse(solutions=solutions, suggested=layout)
     assert optimization_response.solutions == solutions
-    assert optimization_response.default == layout
+    assert optimization_response.suggested == layout
 
 
 def test_solver():

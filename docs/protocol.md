@@ -166,7 +166,7 @@ An optimization response (message type: `o`) is sent by the solver to the AUIT s
     "solutions": {
       "items": [<Layout>, <Layout>, ...]
     },
-    "default": <Layout>
+    "suggested": <Layout>
 }
 ```
 
@@ -242,7 +242,7 @@ Example optimization response:
       }
     ]
   },
-  "default": {
+  "suggested": {
     "items": [
       {
         "id": "button:1",

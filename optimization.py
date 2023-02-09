@@ -163,7 +163,7 @@ def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
 
 
 # Function to generate the Pareto optimal layouts (i.e., the Pareto front)
-def generate_pareto_optimal_layouts_and_default(
+def generate_pareto_optimal_layouts_and_suggested(
     n_objectives: int,
     n_constraints: int,
     initial_layout: networking.layout.Layout,
@@ -173,7 +173,7 @@ def generate_pareto_optimal_layouts_and_default(
     save=False,
     verbose=True,
 ) -> tuple[list[networking.layout.Layout], networking.layout.Layout]:
-    """Generate the Pareto optimal layouts and a default layout as a compromise solution.
+    """Generate the Pareto optimal layouts and a suggested default layout as a compromise solution.
 
     Args:
         n_objectives: The number of objectives.
@@ -262,8 +262,8 @@ def generate_pareto_optimal_layouts_and_default(
         # Return the Pareto optimal layouts
         pareto_optimal_layouts = [problem._x_to_layout(x) for x in res.X[points_of_interest]]
         # Determine the AASF equal weights layout
-        default_layout = get_aasf_equal_weights_layout(problem, res)
-        return pareto_optimal_layouts, default_layout
+        suggested_layout = get_aasf_equal_weights_layout(problem, res)
+        return pareto_optimal_layouts, suggested_layout
 
     # If the Pareto front should be plotted, plot it
     if plot:
@@ -272,8 +272,8 @@ def generate_pareto_optimal_layouts_and_default(
     # Otherwise, return all the Pareto optimal layouts
     pareto_optimal_layouts = [problem._x_to_layout(x) for x in res.X]
     # Determine the AASF equal weights layout
-    default_layout = get_aasf_equal_weights_layout(problem, res)
-    return pareto_optimal_layouts, default_layout
+    suggested_layout = get_aasf_equal_weights_layout(problem, res)
+    return pareto_optimal_layouts, suggested_layout
 
 
 def get_aasf_equal_weights_layout(problem: LayoutProblem, res: Result) -> networking.layout.Layout:
