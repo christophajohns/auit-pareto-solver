@@ -228,16 +228,18 @@ def test_problem():
     ), "Problem should have 7 variables. Got: {}".format(
         problem.n_var
     )
-    # Problem should have 7 lower bounds, the first three set to -20, the rest set to 0
+    # Problem should have 7 lower bounds
+    # The first and third (x and z bounds) should be set to -3, the second (y bound) should be set to -2, the rest set to 0
     assert (
-        all(problem.xl[:3] == -20) and all(problem.xl[3:] == 0)
-    ), "Problem should have 7 lower bounds, the first three set to -20, the rest set to 0. Got: {}".format(
+        problem.xl[0] == -3 and problem.xl[1] == -2 and problem.xl[2] == -3 and all(problem.xl[3:] == 0)
+    ), "Problem should have 7 lower bounds, the first and third set to -3, the second set to -2, the rest set to 0. Got: {}".format(
         problem.xl
     )
-    # Problem should have 7 upper bounds, the first three set to 20, the rest set to 1
+    # Problem should have 7 upper bounds
+    # The first and third (x and z bounds) should be set to 3, the second (y bound) should be set to 2, the rest set to 1
     assert (
-        all(problem.xu[:3] == 20) and all(problem.xu[3:] == 1)
-    ), "Problem should have 7 upper bounds, the first three set to 20, the rest set to 1. Got: {}".format(
+        problem.xu[0] == 3 and problem.xu[1] == 2 and problem.xu[2] == 3 and all(problem.xu[3:] == 1)
+    ), "Problem should have 7 upper bounds, the first and third set to 3, the second set to 2, the rest set to 1. Got: {}".format(
         problem.xu
     )
     # Problem should have an _x_to_layout function that converts a list of 7 decision variables to a layout

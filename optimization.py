@@ -65,11 +65,13 @@ class LayoutProblem(Problem):
             initial_layout.n_items * 7
         )  # 3 position variables + 4 rotation variables
 
-        # TODO: Set the lower and upper bounds:
-        # Each position is bounded between -20 and 20 for x, y and z (This is arbitrary)
+        # Set the lower and upper bounds:
+        # Each position is bounded between -3 and 3 for x and z and -2 and 2 for y (This is arbitrary)
         # Each rotation is bounded between 0 and 1 for x, y, z and w
-        xlower = [-20] * n_variables
-        xupper = [20] * n_variables
+        xlower = [-3] * n_variables
+        xupper = [3] * n_variables
+        xlower[1] = -2
+        xupper[1] = 2
         for i in range(3, n_variables, 7):
             for j in range(4):  # x, y, z and w
                 xlower[i + j] = 0
