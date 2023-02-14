@@ -19,6 +19,7 @@ import networking.layout
 import networking.element
 from tqdm import tqdm
 import time
+from typing import Literal, Optional
 
 # Disable pymoo warnings
 from pymoo.config import Config
@@ -170,7 +171,7 @@ def generate_pareto_optimal_layouts_and_suggested(
     n_constraints: int,
     initial_layout: networking.layout.Layout,
     socket,
-    reduce=False,
+    reduce: Optional[Literal['htp', 'aasf']] = 'aasf',
     plot=False,
     save=False,
     verbose=True,
@@ -248,9 +249,24 @@ def generate_pareto_optimal_layouts_and_suggested(
 
     # If the reduce flag is set to True...
     if reduce:
-        # ...reduce the set of Pareto optimal layouts to the high tradeoff points
-        htp = HighTradeoffPoints()
-        points_of_interest = htp(res.F)  # This is a boolean array
+        if reduce == "htp":
+            # ...reduce the set of Pareto optimal layouts to the high tradeoff points
+            htp = HighTradeoffPoints()
+            points_of_interest = htp(res.F)  # This is a boolean array
+        elif reduce == "aasf":
+            # ...reduce the set of Pareto optimal layouts using AASF
+            aasf = AASF(eps=0, beta=5)
+            # Create an array of weight combinations to yield n_obj+1 layouts
+            # There is a weight combination for each objective and one for the equal weights
+            weights = np.zeros((n_objectives + 1, n_objectives))
+            for i in range(n_objectives):
+                weights[i, i] = 1
+            weights[-1, :] = 1 / n_objectives
+            # Determine the Pareto optimal layouts
+            points_of_interest = np.zeros(res.F.shape[0], dtype=bool)
+            for weight_combination in weights:
+                aasf_optimum_index = aasf.do(res.F, weights=weight_combination).argmin()
+                points_of_interest[aasf_optimum_index] = True
 
         # Add the high tradeoff points to the scatterplot
         scatterplot.add(
