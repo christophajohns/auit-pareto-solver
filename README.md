@@ -47,6 +47,26 @@ To export the environment to a new `environment.yml` file, run:
 $ conda env export | grep -v "^prefix: " > environment.yml
 ```
 
+This project was developed on the MacOS X operating system.
+To create the necessary environment on Windows, you may need to install the following specification:
+
+```yml
+name: auit-pareto-solver
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy
+  - pyzmq
+  - tqdm
+  - ipykernel
+  - pandas
+  - ipympl
+  - jupyter
+  - pip:
+    - pymoo
+```
+
 For testing, we have included a Python script that mocks the AUIT server and client and calls the solver.
 The script can be run with the following command:
 
