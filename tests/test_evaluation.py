@@ -22,8 +22,12 @@ import experiments.pareto_solver
 import experiments.weighted_sum_solver
 import experiments.single_objectives_solver
 import experiments.problem
+import experiments.simulate
 import AUIT
 import numpy as np
+import pandas as pd
+from typing import Callable
+from pymoo.util.ref_dirs import get_reference_directions
 
 # Hyperparameters
 EYE_POSITION = AUIT.networking.element.Position(x=0.0, y=0.0, z=0.0)
@@ -131,9 +135,65 @@ def test_scenario_2_to_4_utility():
     print("Utility at waist level: {}".format(utility_at_waist_level))
     print()
 
+def test_utility_function_at_various_positions(get_utility: Callable):
+    """Test a utility function at various positions."""
+    # Test utility at eye level (should be > 0)
+    print("Testing utility at eye level...")
+    layout_with_element_at_eye_level = get_layout_with_element_at_eye_level()
+    utility_at_eye_level = get_utility(layout_with_element_at_eye_level, verbose=True)
+    assert (
+        utility_at_eye_level > 0
+    ), "Utility should be greater than 0. Got: {}".format(
+        utility_at_eye_level
+    )
+    print("Utility at eye level: {}".format(utility_at_eye_level))
+    print()
+
+def test_utility_population():
+    """Test utility population function."""
+    print("Testing utility population...")
+
+    # Set random seed
+    seed = 42
+
+    # Get 1 utility function with specified weights
+    get_utility = experiments.user.get_utility_functions(
+        objectives=["neck", "shoulder"],
+        weights=1/2,
+        n_functions=1,
+        seed=seed,
+    )[0]
+
+    # Test utility at various positions
+    test_utility_function_at_various_positions(get_utility)
+
+    # Get 1 utility function with random weights
+    get_utility = experiments.user.get_utility_functions(
+        objectives=["neck", "shoulder"],
+        weights=None,
+        n_functions=1,
+        seed=seed,
+    )[0]
+
+    # Test utility at various positions
+    test_utility_function_at_various_positions(get_utility)
+
+    # Get 10 utility functions with random weights
+    get_utilities = experiments.user.get_utility_functions(
+        objectives=["neck", "shoulder"],
+        weights=None,
+        n_functions=10,
+        seed=seed,
+    )
+
+    # Test utility at various positions
+    for get_utility in get_utilities:
+        test_utility_function_at_various_positions(get_utility)
+
 
 def test_utility_functions():
     """Test various utility functions for the user models."""
+    test_utility_population()
     test_scenario_1_utility()
     test_scenario_2_to_4_utility()
 
@@ -377,8 +437,8 @@ def test_pareto_solver():
         type(pareto_optimal_adaptations_aasf)
     )
     assert (
-        len(pareto_optimal_adaptations_aasf) == problem.n_obj + 1
-    ), "Adaptations should have n_obj+1 elements. Got: {}".format(
+        len(pareto_optimal_adaptations_aasf) == 10
+    ), "Adaptations should have 10 elements. Got: {}".format(
         len(pareto_optimal_adaptations_aasf)
     )
     for adaptation in pareto_optimal_adaptations_aasf:
@@ -392,7 +452,7 @@ def test_pareto_solver():
         ), "Adaptation should be valid. Got: {}".format(
             adaptation
         )
-    print("Pareto optimal adaptation layouts (n_obj+1 AASF): {}".format(pareto_optimal_adaptations_aasf))
+    print("Pareto optimal adaptation layouts (10 AASF): {}".format(pareto_optimal_adaptations_aasf))
     print()
 
     # Test getting multiple adaptation solutions (WS)
@@ -443,36 +503,59 @@ def test_weighted_sum_solver():
     problem = experiments.problem.LayoutProblem(
         objectives=["neck", "shoulder"]
     )
+
+    def test_solution(layout):
+        """Test solution."""
+        assert (
+            isinstance(layout, AUIT.networking.layout.Layout)
+        ), "Adaptation should be a layout. Got: {}".format(
+            type(layout)
+        )
+        assert (
+            problem.layout_is_valid(layout=layout)
+        ), "Adaptation should be valid. Got: {}".format(
+            layout
+        )
+        print("Weighted sum adaptation layout: {}".format(layout))
+        print()
+
+
     # Create a solver
     weighted_sum_solver = experiments.weighted_sum_solver.WeightedSumSolver(problem=problem, weights=1/problem.n_obj, pop=100, n_gen=100, seed=42)
     # Test getting a single adaptation solution
-    weighted_sum_adaptation = weighted_sum_solver.get_adaptations(verbose=True)[0]
-    assert (
-        isinstance(weighted_sum_adaptation, AUIT.networking.layout.Layout)
-    ), "Adaptation should be a layout. Got: {}".format(
-        type(weighted_sum_adaptation)
-    )
-    assert (
-        problem.layout_is_valid(layout=weighted_sum_adaptation)
-    ), "Adaptation should be valid. Got: {}".format(
-        weighted_sum_adaptation
-    )
-    print("Weighted sum adaptation layout: {}".format(weighted_sum_adaptation))
-    print()
+    weighted_sum_adaptation = weighted_sum_solver.get_adaptations(max_n_proposals=1, verbose=True)[0]
+    test_solution(weighted_sum_adaptation)
 
     # Test Nelder Mead algorithm for weighted sum solver
     weighted_sum_solver = experiments.weighted_sum_solver.WeightedSumSolver(problem=problem, weights=1/problem.n_obj, pop=100, n_gen=100, seed=42, algo="nm")
-    weighted_sum_adaptation_nm = weighted_sum_solver.get_adaptations(verbose=True)[0]
+    weighted_sum_adaptation_nm = weighted_sum_solver.get_adaptations(max_n_proposals=1, verbose=True)[0]
+    test_solution(weighted_sum_adaptation_nm)
+
+    # Test NSGA-III single-objective algorithm for weighted sum solver
+    weighted_sum_solver = experiments.weighted_sum_solver.WeightedSumSolver(problem=problem, weights=1/problem.n_obj, pop=100, n_gen=100, seed=42, algo="nsga3")
+    weighted_sum_adaptation_nsga3 = weighted_sum_solver.get_adaptations(max_n_proposals=1, verbose=True)[0]
+    test_solution(weighted_sum_adaptation_nsga3)
+
+    # Test getting multiple adaptation solutions using NSGA-III
+    weighted_sum_adaptations_nsga3 = weighted_sum_solver.get_adaptations(max_n_proposals=10, verbose=True)
     assert (
-        isinstance(weighted_sum_adaptation_nm, AUIT.networking.layout.Layout)
-    ), "Adaptation should be a layout. Got: {}".format(
-        type(weighted_sum_adaptation_nm)
+        isinstance(weighted_sum_adaptations_nsga3, list)
+    ), "Adaptations should be a list. Got: {}".format(
+        type(weighted_sum_adaptations_nsga3)
     )
     assert (
-        problem.layout_is_valid(layout=weighted_sum_adaptation_nm)
-    ), "Adaptation should be valid. Got: {}".format(
-        weighted_sum_adaptation_nm
+        len(weighted_sum_adaptations_nsga3) > 1 and len(weighted_sum_adaptations_nsga3) <= 10
+    ), "Adaptations should have between 2 and 10 elements. Got: {}".format(
+        len(weighted_sum_adaptations_nsga3)
     )
+    assert (
+        len(weighted_sum_adaptations_nsga3) == len(set([str(adaptation) for adaptation in weighted_sum_adaptations_nsga3]))
+    ), "Adaptations should be unique. Got: {}".format(
+        weighted_sum_adaptations_nsga3
+    )
+    for adaptation in weighted_sum_adaptations_nsga3:
+        test_solution(adaptation)
+
 
 def test_multiple_single_objectives_solver():
     """Test multiple single objectives solver."""
@@ -508,14 +591,215 @@ def test_multiple_single_objectives_solver():
     print("Single objective adaptation layouts: {}".format(single_objectives_adaptations))
     print()
 
+def test_simulations():
+    """Test simulation functions used in the Jupyter notebook."""
+    print("Testing simulations...")
+
+    N_UTILITY_FUNCTIONS = 20
+    N_RUNS = 3
+    N_PROPOSALS = [1, 10]
+    SOLVERS = ["Ours", "WS"]
+
+    # Get utility functions
+    SCENARIO_1_PREFERENCE_CRITERIA = ["neck", "shoulder", "torso"]
+    utility_functions = experiments.user.get_utility_functions_for_different_seeds(
+        SCENARIO_1_PREFERENCE_CRITERIA, n_functions=N_UTILITY_FUNCTIONS, seed=111
+    )
+
+    # Get MOO problem
+    SCENARIO_1_OBJECTIVES = ["neck", "shoulder"]
+    problem = experiments.problem.LayoutProblem(
+        objectives=SCENARIO_1_OBJECTIVES
+    )
+
+    # Get runtimes and results
+    runtimes, results = experiments.simulate.get_runtimes_and_results_dfs(
+        problem=problem,
+        scenario="TEST",
+        utility_functions=utility_functions,
+        n_runs=N_RUNS,
+        seed=42,
+    )
+
+    # Assert that the runtimes are correct
+    # Check that runtimes is a pd.DataFrame with the correct columns
+    assert (
+        isinstance(runtimes, pd.DataFrame)
+    ), "Runtimes should be a pd.DataFrame. Got: {}".format(
+        type(runtimes)
+    )
+    EXPECTED_COLUMNS = [
+        "run_id",
+        "scenario",
+        "solver",
+        "n_proposals",
+        "run_iter",
+        "seed",
+        "start_time",
+        "end_time",
+        "runtime",
+    ]
+    assert (
+        set(runtimes.columns) == set(EXPECTED_COLUMNS)
+    ), "Runtimes should have columns: {}. Got: {}".format(
+        EXPECTED_COLUMNS, runtimes.columns
+    )
+
+    # Check that the number of rows is correct
+    assert (
+        runtimes.shape[0] == N_RUNS * len(N_PROPOSALS) * len(SOLVERS)
+    ), "Runtimes should have {} rows. Got: {}".format(
+        N_RUNS * len(N_PROPOSALS) * len(SOLVERS), runtimes.shape[0]
+    )
+
+    # Check that the scenario is correct
+    assert (
+        runtimes["scenario"].unique()[0] == "TEST"
+    ), "Runtimes should have scenario TEST. Got: {}".format(
+        runtimes["scenario"].unique()[0]
+    )
+
+    # Check that the solver is correct
+    assert (
+        set(runtimes["solver"].unique()) == set(SOLVERS)
+    ), "Runtimes should have solver {}. Got: {}".format(
+        SOLVERS, runtimes["solver"].unique()
+    )
+
+    # Check that the number of proposals is correct
+    assert (
+        set(runtimes["n_proposals"].unique()) == set(N_PROPOSALS)
+    ), "Runtimes should have n_proposals {}. Got: {}".format(
+        N_PROPOSALS, runtimes["n_proposals"].unique()[0]
+    )
+
+    # Check that the run_iter is correct (ranging from 1 to 10)
+    assert (
+        set(runtimes["run_iter"].unique()) == set(range(1, N_RUNS + 1))
+    ), "Runtimes should have run_iter ranging from 1 to {}. Got: {}".format(
+        N_RUNS, runtimes["run_iter"].unique()
+    )
+
+    # Check that the seed is correct (no duplicates across runs)
+    assert (
+        len(runtimes["seed"].unique()) == N_RUNS
+    ), "Runs should have unique seeds. Got: {}".format(
+        runtimes["seed"].unique()
+    )
+
+    # Assert that the results are correct
+    # Check that results is a pd.DataFrame with the correct columns
+    assert (
+        isinstance(results, pd.DataFrame)
+    ), "Results should be a pd.DataFrame. Got: {}".format(
+        type(results)
+    )
+    EXPECTED_COLUMNS = [
+        "run_id",
+        "utility_id",
+        "adaptation_id",
+        "utility",
+    ]
+    assert (
+        set(results.columns) == set(EXPECTED_COLUMNS)
+    ), "Results should have columns: {}. Got: {}".format(
+        EXPECTED_COLUMNS, results.columns
+    )
+
+    # Check that the number of rows is correct
+    assert (
+        results.shape[0] == N_RUNS * N_UTILITY_FUNCTIONS * sum(N_PROPOSALS) * len(SOLVERS)
+    ), "Results should have {} rows. Got: {}".format(
+        N_RUNS * N_UTILITY_FUNCTIONS * sum(N_PROPOSALS) * len(SOLVERS), results.shape[0]
+    )
+
+    # Test that you can get the expected utility for a given set of preference criteria
+    test_get_expected_utility()
+
+
+def test_get_expected_utility():
+    """Test that you can get the expected utility for a given set of preference criteria."""
+    # Get utility functions
+    PREFERENCE_CRITERIA = ["neck", "shoulder", "torso"]
+    utility_functions = experiments.user.get_utility_functions(PREFERENCE_CRITERIA, n_functions=20, seed=42)
+    expected_utility = experiments.simulate.get_expected_utility(
+        PREFERENCE_CRITERIA,
+        utility_functions,
+        n_trials=1000,
+        seed=42,
+    )
+    assert (
+        isinstance(expected_utility, float)
+    ), "Expected utility should be a float. Got: {}".format(
+        type(expected_utility)
+    )
+    assert (
+        expected_utility > 0
+    ), "Expected utility should be positive. Got: {}".format(
+        expected_utility
+    )
+
+
+
+def test_riesz():
+    """Test Riesz s-Energy reference points to generate well-spaced weights."""
+    print("Testing Riesz s-Energy reference points...")
+
+    N_OBJ = [2, 3, 4]
+    N_REF_POINTS = [1, 5, 10]
+
+    def test_shape(ref_dirs, n_obj, n_ref_points):
+        """Assert that the reference points have the right shape."""
+        # Check that ref_dirs is a np.ndarray with the correct shape
+        assert (
+            isinstance(ref_dirs, np.ndarray)
+        ), "Reference points should be a np.ndarray. Got: {}".format(
+            type(ref_dirs)
+        )
+
+        assert (
+            ref_dirs.shape == (n_ref_points, n_obj)
+        ), "Reference points should have shape: ({}, {}). Got: {}".format(
+            n_ref_points, n_obj, ref_dirs.shape
+        )
+
+    def test_well_spaced(ref_dirs):
+        """Check that the reference points are well-spaced."""
+        # Minimum distance between any two neighboring reference points should be similar across
+        # all neighboring reference points
+        # Compute pairwise distances using numpy
+        pairwise_distances = np.linalg.norm(
+            ref_dirs[:, None] - ref_dirs[None, :], axis=-1
+        )
+        # Set diagonal to infinity
+        np.fill_diagonal(pairwise_distances, np.inf)
+        # Get minimum distance between any two neighboring reference points
+        min_distances = np.min(pairwise_distances, axis=1)
+        # Check that the minimum distance between any two neighboring reference points is similar
+        # across all neighboring reference points
+        assert (
+            np.allclose(min_distances, min_distances[0], rtol=5e-2, atol=5e-2)
+        ), "Reference points should be well-spaced. Got: {}".format(min_distances)
+
+    for n_obj in N_OBJ:
+        for n_ref_points in N_REF_POINTS:
+            ref_dirs = get_reference_directions(
+                "energy", n_obj, n_ref_points, seed=42
+            )
+            test_shape(ref_dirs, n_obj, n_ref_points)
+            test_well_spaced(ref_dirs)
+
+
 def test_evaluation():
     """Test evaluations."""
-    test_utility_functions()
-    test_random_solver()
-    test_problem()
-    test_multiple_single_objectives_solver()
-    test_weighted_sum_solver()
-    test_pareto_solver()
+    # test_riesz()
+    test_simulations()
+    # test_utility_functions()
+    # test_random_solver()
+    # test_problem()
+    # test_multiple_single_objectives_solver()
+    # test_weighted_sum_solver()
+    # test_pareto_solver()
 
 
 def main():

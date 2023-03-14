@@ -27,6 +27,7 @@ from pymoo.optimize import minimize
 from pymoo.decomposition.aasf import AASF
 from pymoo.decomposition.weighted_sum import WeightedSum
 from pymoo.core.result import Result as PymooResult
+from pymoo.util.ref_dirs import get_reference_directions
 
 
 class ParetoSolver(Solver):
@@ -61,7 +62,7 @@ class ParetoSolver(Solver):
 
         return res
 
-    def get_adaptations(self, decomposition: Optional[Literal['full', 'aasf', 'ws']] = None, verbose: bool = False) -> list[networking.layout.Layout]:
+    def get_adaptations(self, decomposition: Optional[Literal['full', 'aasf', 'ws']] = None, verbose: bool = False, seed: int = 42) -> list[networking.layout.Layout]:
         """Returns one or multiple Pareto optimal adaptations in the design space defined in the problem."""
         # Get the Pareto front
         res = self._get_solutions(verbose=verbose)
@@ -79,31 +80,30 @@ class ParetoSolver(Solver):
         if not decomposition:
             return [self.problem._x_to_layout(x) for x in res.X]
 
+        equal_weights = np.ones(self.problem.n_obj) / self.problem.n_obj
+
         # If weighted sum decomposition is requested, return the Pareto optimal layout decomposed via an equally weighted sum
         if decomposition == 'ws':
             decomp = WeightedSum()
-            equal_weights = np.ones(self.problem.n_obj) / self.problem.n_obj
             equal_weight_layout_ws = self.problem._x_to_layout(res.X[decomp.do(res.F, weights=equal_weights).argmin()])
             return [equal_weight_layout_ws]
         
         # Otherwise, set up AASF decomposition
         decomp = AASF(eps=0.0, beta=25)
-        equal_weights = np.ones(self.problem.n_obj) / self.problem.n_obj
-        equal_weight_layout_aasf = self.problem._x_to_layout(res.X[decomp.do(res.F, weights=equal_weights).argmin()])
 
         # If full decomposition is requested, return the Pareto optimal layout decomposed via equally weighted AASF
         if decomposition == 'full':
+            equal_weight_layout_aasf = self.problem._x_to_layout(res.X[decomp.do(res.F, weights=equal_weights).argmin()])
             return [equal_weight_layout_aasf]
 
         # If AASF decomposition is requested, return Pareto optimal layouts decomposed via AASF
-        # Return the equally weighted layout and single-objective layouts
-        # Construct the weights for the single-objective layouts
-        single_obj_weights = np.zeros((self.problem.n_obj, self.problem.n_obj))
-        for i in range(self.problem.n_obj):
-            single_obj_weights[i, i] = 1
-        return [equal_weight_layout_aasf] + [
-            self.problem._x_to_layout(res.X[decomp.do(res.F, weights=weights).argmin()])
-            for weights in single_obj_weights
-        ]
-        
-            
+        # Return the layouts with well-spaced reference directions derived via
+        # Riesz s-Energy
+        N_REF_DIRS = 10
+        ref_dirs = get_reference_directions(
+            "energy", self.problem.n_obj, N_REF_DIRS, seed=seed
+        )
+        return [
+            self.problem._x_to_layout(res.X[decomp.do(res.F, weights=ref_dir).argmin()])
+            for ref_dir in ref_dirs
+        ]   

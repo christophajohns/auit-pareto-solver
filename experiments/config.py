@@ -1,5 +1,5 @@
 import AUIT
-from typing import Literal
+from typing import Literal, Callable, Optional
 
 OBJECTIVE = Literal["neck", "shoulder", "torso", "reach"]
 
@@ -14,3 +14,5 @@ OBJECTIVE_FUNCTIONS = {
     "torso": lambda adaptation: sum([AUIT.get_torso_ergonomics_cost(waist_position=WAIST_POSITION, element=item) for item in adaptation.items]),
     "reach": lambda adaptation: sum([AUIT.get_at_arms_length_cost(shoulder_joint_position=SHOULDER_JOINT_POSITION, arm_length=ARM_LENGTH, element=item) for item in adaptation.items]),
 }
+
+UTILITY_FUNCTION = Callable[[AUIT.networking.layout.Layout, Optional[bool]], float]

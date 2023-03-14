@@ -157,10 +157,10 @@ def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
     ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=seed)
 
     # create the algorithm object
-    # algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 1-3
-    algorithm = UNSGA3(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 3
-    # algorithm = SMSEMOA(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 3
-    # algorithm = RVEA(pop_size=pop_size, ref_dirs=ref_dirs)  # Exp. 3
+    # algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 1-3
+    algorithm = UNSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
+    # algorithm = SMSEMOA(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
+    # algorithm = RVEA(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
 
     return algorithm
 
