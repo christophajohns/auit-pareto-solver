@@ -90,9 +90,6 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
         # For each number of proposals (1 and 10)...
         for k, n_prop in enumerate(n_proposals):
 
-            if solver == "Ours" and n_prop == 1:
-                continue
-
             # Get the data for the current number of proposals
             n_prop_data = solver_data[solver_data["n_proposals"] == n_prop]
 
@@ -135,7 +132,7 @@ def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
         The figure containing the plotted boxplots.
     """
     # Define colors for the solvers
-    colors = {"WS (1 prop)": "tab:blue", "WS (10 prop)": "tab:green", "Ours": "tab:orange"}
+    colors = {"WS (1 prop)": "tab:blue", "WS (10 prop)": "tab:green", "Ours (1 prop)": "tab:orange", "Ours (10 prop)": "tab:red"}
 
     # Create figure and subplots
     fig, axs = plt.subplots(ncols=2, figsize=(10, 5))
@@ -159,9 +156,9 @@ def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
 
     # Define the solvers and number of proposals
     scenarios = ["CONV+LIN", "NCONV+NLIN"]
-    solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (10 prop)"]
-    solvers = ["WS", "WS", "Ours"]
-    n_proposals = [1, 10, 10]
+    solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
+    solvers = ["WS", "WS", "Ours", "Ours"]
+    n_proposals = [1, 10, 1, 10]
 
 
     # For each scenario (CONV+LIN and NCONV+NLIN)...
@@ -302,9 +299,6 @@ def plot_max_utilities_for_scenario(ax: plt.Axes, scenario: str, solvers: List[s
         # For each number of proposals (1 and 10)...
         for k, n_prop in enumerate(n_proposals):
 
-            if solver == "Ours" and n_prop == 1:
-                continue
-
             # Get the data for the current number of proposals
             n_prop_data = solver_data[solver_data["n_proposals"] == n_prop]
 
@@ -367,7 +361,7 @@ def plot_max_utilities(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected
     scenarios = ["CONV+LIN", "NCONV+NLIN"]
     solvers = ["WS", "Ours"]
     n_proposals = [1, 10]
-    solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (10 prop)"]
+    solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
 
     # For each scenario (CONV+LIN and NCONV+NLIN)...
     for i, scenario in enumerate(scenarios):
@@ -431,7 +425,7 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     scenarios = ["CONV+LIN", "NCONV+NLIN"]
     solvers = ["WS", "Ours"]
     n_proposals = [1, 10]
-    solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (10 prop)"]
+    solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
 
     # For each scenario (CONV+LIN and NCONV+NLIN)...
     for i, scenario in enumerate(scenarios):

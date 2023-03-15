@@ -94,21 +94,35 @@ The goal is to minimize the angle between the vectors and thereby to minimize th
 
 To generate a convex Pareto frontier shape, we use the formulation described where the cost grows linearly with the angle:
 
-$SE_{conv}(\mathbf{x}) = \frac{1}{2} \left(1 - \frac{\theta}{\pi}\right)$
+$SE_{conv}(\theta) = \frac{\theta}{2\pi}$
 
 where $\theta$ is the angle between the vectors.
 
 ##### Non-Convex (Concave) Pareto Frontier Shape
 
-To generate a non-convex (concave) Pareto frontier shape, we use the formulation described where the cost grows exponentially with the angle:
+To generate a non-convex (concave) Pareto frontier shape, we use the formulation described below where the cost grows quasi-exponentially in periodic intervals with the angle:
 
-$SE_{\overline{conv}}(\mathbf{x}) = \frac{1}{2} \left(1 - \exp\left(-\frac{a}{\theta}\right)\right)$
+$$
+SE_{\overline{conv}}(\theta) = \begin{cases}
+        \frac{e^{\frac{\theta \mod 2\pi}{\pi }} - 1}{e-1} & \text{if $\theta \mod 2\pi  \leq \pi$}  \\
+        \frac{e^{-\frac{\theta \mod 2\pi - 2\pi }{\pi }} - 1}{e-1} & \text{otherwise}
+\end{cases}
+$$
 
-where $\theta$ is the angle between the vectors and $a$ is a constant that controls the steepness of the curve. We set $a = 10$.
+where $\theta$ is the angle between the vectors in radians.
 
 #### Reachability (RE)
 
-The reachability objective (RE) is based on a simple distance metric. The objective is to maximize the reachability. The objective is defined as the distance between the user's shoulder joint and the UI element (i.e., adaptation). The objective has a minimum value of 0 if the UI element is within reach of the user as defined by a reachability threshold (i.e., arm length) and a maximum value striving toward 1 if the UI element is outside of the reachability threshold. If the element is at the user's shoulder position, the objective has a value of 1.
+The reachability objective (RE) is based on a simple distance metric. The objective is to maximize the reachability. The objective is defined as the distance between the user's shoulder joint and the UI element (i.e., adaptation). The objective has a minimum value of 0 if the UI element is within reach of the user as defined by a reachability threshold (i.e., arm length plus some tolerance) and a maximum value striving toward 1 if the UI element is outside of the reachability threshold. If the element is at the user's shoulder position, the objective has a value of 1:
+
+$$
+RE(d) = \begin{cases}
+        1 & \text{if $d \leq l + t$}  \\
+        \frac{e^{-a(d - l - t)}}{e-1} & \text{otherwise}
+\end{cases}
+$$
+
+where $d$ is the distance between the user's shoulder joint and the UI element, $l$ is the user's arm length, $t$ is the reachability tolerance and $a$ is a constant that controls the rate of decay.
 
 The goal is to minimize the distance between the user's shoulder joint and the UI element to maximize the reachability.
 

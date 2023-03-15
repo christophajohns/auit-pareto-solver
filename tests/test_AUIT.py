@@ -64,15 +64,21 @@ def get_element_at_arms_length():
     )
     return element_at_arms_length
 
-def get_element_not_at_arms_length():
-    """Returns a UI element in front of the shoulder joint at arm's length."""
+def get_element_not_at_arms_length(distance_factor=1.5):
+    """Returns a UI element in front of the shoulder joint not at arm's length."""
     # Define test element for cost evaluation not at arm's length
     element_not_at_arms_length = AUIT.networking.element.Element(
         id="test_element_not_at_arms_length",
-        position=AUIT.networking.element.Position(x=SHOULDER_JOINT_POSITION.x + ARM_LENGTH * 1.5, y=SHOULDER_JOINT_POSITION.y, z=SHOULDER_JOINT_POSITION.z),
+        position=AUIT.networking.element.Position(x=SHOULDER_JOINT_POSITION.x + ARM_LENGTH * distance_factor, y=SHOULDER_JOINT_POSITION.y, z=SHOULDER_JOINT_POSITION.z),
         rotation=AUIT.networking.element.Rotation(x=0.0, y=0.0, z=0.0, w=1.0),
     )
     return element_not_at_arms_length
+
+def get_element_far_from_arms_length():
+    """Returns a UI element in front of the shoulder joint far from arm's length."""
+    # Define test element for cost evaluation far from arm's length
+    element_far_from_arms_length = get_element_not_at_arms_length(distance_factor=30)
+    return element_far_from_arms_length
 
 def get_element_at_hand_position():
     """Returns a UI element at the hand position."""
@@ -178,6 +184,132 @@ def test_cost_evaluation_at_eye_level():
     )
     print("Arm ergonomics cost: {}".format(arm_ergonomics_cost))
 
+    # Calculate exponential arm ergonomics cost
+    exp_arm_ergonomics_cost = AUIT.get_exp_arm_ergonomics_cost(
+        SHOULDER_JOINT_POSITION, element_at_eye_level
+    )
+
+    test_exp_arm_ergonomics_cost()
+
+    # Check the cost
+    assert (
+        exp_arm_ergonomics_cost > 0
+    ), "Exponential arm ergonomics cost should be greater than 0. Got: {}".format(
+        exp_arm_ergonomics_cost
+    )
+    print("Arm ergonomics cost: {}".format(exp_arm_ergonomics_cost))
+    assert (
+        arm_ergonomics_cost < exp_arm_ergonomics_cost
+    ), "Arm ergonomics cost should be smaller than exponential arm ergonomics cost. Got: {} and {}".format(
+        arm_ergonomics_cost, exp_arm_ergonomics_cost
+    )
+
+def test_exp_arm_ergonomics_cost():
+    """Test exponential arm ergonomics cost."""
+    print("Testing exponential arm ergonomics cost...")
+
+    assert (
+        nearly_equal(AUIT.get_exp_arm_ergonomics_cost_from_angle(0), 0)
+    ), "Exponential arm ergonomics cost should be 0 for angle 0. Got: {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(0)
+    )
+
+    assert (
+        nearly_equal(AUIT.get_exp_arm_ergonomics_cost_from_angle(180), 1)
+    ), "Exponential arm ergonomics cost should be 1 for angle 180. Got: {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(180)
+    )
+
+    assert (
+        nearly_equal(AUIT.get_exp_arm_ergonomics_cost_from_angle(185), AUIT.get_exp_arm_ergonomics_cost_from_angle(175))
+    ), "Exponential arm ergonomics cost should be equal for angles 185 and 175. Got: {} and {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(185), AUIT.get_exp_arm_ergonomics_cost_from_angle(175)
+    )
+
+    assert (
+        nearly_equal(AUIT.get_exp_arm_ergonomics_cost_from_angle(-10), AUIT.get_exp_arm_ergonomics_cost_from_angle(10))
+    ), "Exponential arm ergonomics cost should be equal for angles -10 and 10. Got: {} and {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(-10), AUIT.get_exp_arm_ergonomics_cost_from_angle(10)
+    )
+
+    assert (
+        nearly_equal(AUIT.get_exp_arm_ergonomics_cost_from_angle(0), AUIT.get_exp_arm_ergonomics_cost_from_angle(360))
+    ), "Exponential arm ergonomics cost should be equal for angles 0 and 360. Got: {} and {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(0), AUIT.get_exp_arm_ergonomics_cost_from_angle(360)
+    )
+
+    assert (
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(90) > AUIT.get_exp_arm_ergonomics_cost_from_angle(0)
+    ), "Exponential arm ergonomics cost should be greater for angle 90 than for angle 0. Got: {} and {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(90), AUIT.get_exp_arm_ergonomics_cost_from_angle(0)
+    )
+
+    assert (
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(180) > AUIT.get_exp_arm_ergonomics_cost_from_angle(90)
+    ), "Exponential arm ergonomics cost should be greater for angle 180 than for angle 90. Got: {} and {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(180), AUIT.get_exp_arm_ergonomics_cost_from_angle(90)
+    )
+
+    assert (
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(270) < AUIT.get_exp_arm_ergonomics_cost_from_angle(180)
+    ), "Exponential arm ergonomics cost should be less for angle 270 than for angle 180. Got: {} and {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(270), AUIT.get_exp_arm_ergonomics_cost_from_angle(180)
+    )
+
+    assert (
+        nearly_equal(AUIT.get_exp_arm_ergonomics_cost_from_angle(370), AUIT.get_exp_arm_ergonomics_cost_from_angle(10))
+    ), "Exponential arm ergonomics cost should be equal for angles 370 and 10. Got: {} and {}".format(
+        AUIT.get_exp_arm_ergonomics_cost_from_angle(370), AUIT.get_exp_arm_ergonomics_cost_from_angle(10)
+    )
+
+    # Test that cost grows quasi-exponentially for angles between 0 and 180 by checking that the difference between
+    # the costs for angles growing by 10 degrees grows
+    initial_diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(10) - AUIT.get_exp_arm_ergonomics_cost_from_angle(0)
+    for i in range(1, 17):
+        diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * (i + 1)) - AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * i)
+        assert (
+            diff_of_costs > initial_diff_of_costs
+        ), "Difference of exponential arm ergonomics costs should grow for angles growing by 10 degrees. Got: {} and {}".format(
+            initial_diff_of_costs, diff_of_costs
+        )
+        initial_diff_of_costs = diff_of_costs
+
+    # Test that cost decreases quasi-exponentially for angles between 180 and 360 by checking that the difference between
+    # the costs for angles growing by 10 degrees decreases
+    initial_diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(190) - AUIT.get_exp_arm_ergonomics_cost_from_angle(180)
+    for i in range(1, 17):
+        diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * (i + 1) + 180) - AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * i + 180)
+        assert (
+            diff_of_costs > initial_diff_of_costs
+        ), "Difference of exponential arm ergonomics costs should decrease for angles growing by 10 degrees. Got: {} and {}".format(
+            initial_diff_of_costs, diff_of_costs
+        )
+        initial_diff_of_costs = diff_of_costs
+    
+    # Test that the cost increases again quasi-exponentially for angles between 360 and 540 by checking that the difference between
+    # the costs for angles growing by 10 degrees grows
+    initial_diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(370) - AUIT.get_exp_arm_ergonomics_cost_from_angle(360)
+    for i in range(1, 17):
+        diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * (i + 1) + 360) - AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * i + 360)
+        assert (
+            diff_of_costs > initial_diff_of_costs
+        ), "Difference of exponential arm ergonomics costs should grow for angles growing by 10 degrees. Got: {} and {}".format(
+            initial_diff_of_costs, diff_of_costs
+        )
+        initial_diff_of_costs = diff_of_costs
+
+    # Test that the cost decreases again quasi-exponentially for angles between 540 and 720 by checking that the difference between
+    # the costs for angles growing by 10 degrees decreases
+    initial_diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(550) - AUIT.get_exp_arm_ergonomics_cost_from_angle(540)
+    for i in range(1, 17):
+        diff_of_costs = AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * (i + 1) + 540) - AUIT.get_exp_arm_ergonomics_cost_from_angle(10 * i + 540)
+        assert (
+            diff_of_costs > initial_diff_of_costs
+        ), "Difference of exponential arm ergonomics costs should decrease for angles growing by 10 degrees. Got: {} and {}".format(
+            initial_diff_of_costs, diff_of_costs
+        )
+        initial_diff_of_costs = diff_of_costs
+
 
 def test_cost_evaluation_at_waist_level():
     """Test cost evaluation for an element at the waist."""
@@ -258,6 +390,27 @@ def test_cost_evaluation_at_arms_length():
     assert (
         at_arms_length_cost > 0
     ), "'At arm's length' reachability cost should be greater than 0. Got: {}".format(
+        at_arms_length_cost
+    )
+
+    # Define test element for cost evaluation far from arm's length
+    element_far_from_arms_length = get_element_far_from_arms_length()
+
+    # Calculate "at arm's length" reachability cost
+    at_arms_length_cost = AUIT.get_at_arms_length_cost(
+        SHOULDER_JOINT_POSITION, ARM_LENGTH, element_far_from_arms_length
+    )
+
+    # Check the cost
+    assert (
+        at_arms_length_cost > 0
+    ), "'At arm's length' reachability cost should be greater than 0. Got: {}".format(
+        at_arms_length_cost
+    )
+    # Check the cost
+    assert (
+        at_arms_length_cost < 1
+    ), "'At arm's length' reachability cost should be less than 1. Got: {}".format(
         at_arms_length_cost
     )
 

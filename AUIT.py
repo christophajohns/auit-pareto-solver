@@ -29,7 +29,7 @@ import math
 import numpy as np
 import networking.layout
 import networking.element
-from typing import List
+from typing import List, Union
 
 
 def handle_optimization_response(response_data):
@@ -75,6 +75,7 @@ def get_at_arms_length_cost(
     arm_length: float,
     element: networking.element.Element,
     tolerance: float = 0.01,
+    decay: float = 0.1,
 ):
     """Return the at-arms-length cost of an element for a given shoulder joint position
     and arm length. The distance between the element and the shoulder joint position
@@ -90,8 +91,11 @@ def get_at_arms_length_cost(
         + (shoulder_joint_position.z - element.position.z) ** 2
     )
 
+    # Calculate difference between the distance and the arm length
+    distance_difference = abs(distance - arm_length)
+
     # Calculate the at-arms-length cost
-    at_arms_length_cost = abs(1.0 - distance / arm_length) - tolerance
+    at_arms_length_cost = 0.0 if distance <= arm_length + tolerance * arm_length else 1 - np.exp(-decay * (distance_difference - tolerance * arm_length))
 
     return at_arms_length_cost
 
@@ -232,17 +236,12 @@ def get_torso_ergonomics_cost(
 
     return torso_ergonomics_cost
 
-def get_arm_ergonomics_cost(
+def get_arm_angle(
     shoulder_joint_position: networking.element.Position,
-    element: networking.element.Element,
+    element: networking.element.Element,  
 ):
     """
-    Return the arm ergonomics cost of an element for a given shoulder joint position
-    and arm length.
-
-    The arm ergonomics cost is calculated as the angle between the vector
-    from the shoulder joint position to the element and the vector from the
-    shoulder joint position to the ground.
+    Return the angle of the arm trying to reach the element.
     """
     # Calculate the vector from the shoulder joint position to the element
     shoulder_to_element_vector = [
@@ -261,6 +260,39 @@ def get_arm_ergonomics_cost(
         shoulder_to_element_vector, shoulder_to_ground_vector
     )
 
+    return arm_angle
+
+def get_arm_angle_deg(
+    shoulder_joint_position: networking.element.Position,
+    element: networking.element.Element,
+):
+    """
+    Return the angle of the arm trying to reach the element in degrees.
+    """
+    # Calculate the arm angle
+    arm_angle = get_arm_angle(shoulder_joint_position, element)
+
+    # If the angle is infinity or undefined, return it
+    if arm_angle == math.inf or arm_angle is None:
+        return arm_angle
+
+    return arm_angle * 180 / math.pi
+
+def get_arm_ergonomics_cost(
+    shoulder_joint_position: networking.element.Position,
+    element: networking.element.Element,
+):
+    """
+    Return the arm ergonomics cost of an element for a given shoulder joint position
+    and arm length.
+
+    The arm ergonomics cost is calculated as the angle between the vector
+    from the shoulder joint position to the element and the vector from the
+    shoulder joint position to the ground.
+    """
+    # Calculate the arm angle
+    arm_angle = get_arm_angle(shoulder_joint_position, element)
+
     # If the angle is infinity, return 1
     if arm_angle == math.inf or arm_angle is None:
         return 1.0
@@ -271,6 +303,51 @@ def get_arm_ergonomics_cost(
     # Print arm angle in degrees
     # print(f"Arm angle: {arm_angle * 180 / math.pi}°")
 
+    return arm_ergonomics_cost
+
+def get_exp_arm_ergonomics_cost_from_angle(
+    arm_angle: Union[float, None],
+):
+    """
+    Return the exponential arm ergonomics cost of an element for a given arm angle in degrees.
+    """
+    # If the angle is infinity, return 1
+    if arm_angle == math.inf or arm_angle is None:
+        return 1.0
+
+    # Calculate the exponential arm ergonomics cost normalized to [0, 1]
+    # The cost grows exponentially with the angle
+    # It has a maximum of 1 if the angle is 180°
+    # It has a minimum of close to 0 if the angle is 0°
+    # If the angle is greater than 180°, the cost wraps around and decreases
+    # If the angle is less than 0°, the cost is calculated using the absolute value of the angle
+    arm_angle_rad = arm_angle * np.pi / 180
+
+    # Cost has formula: f(x) = { (e^(x mod 2π/π) - 1)/(e-1) , x mod 2π <= π
+    #                          { (e^(-(x mod 2π-2π)/π) - 1)/(e-1) , x mod 2π > π
+    # where x is the arm angle in radians
+    x_mod = np.mod(arm_angle_rad, 2*np.pi)
+    arm_ergonomics_cost = np.where(x_mod <= np.pi, (np.exp(x_mod/np.pi) - 1)/(np.exp(1)-1), 
+                    (np.exp(-(x_mod-2*np.pi)/np.pi) - 1)/(np.exp(1)-1)).item()
+    return arm_ergonomics_cost
+
+def get_exp_arm_ergonomics_cost(
+    shoulder_joint_position: networking.element.Position,
+    element: networking.element.Element,
+):
+    """
+    Return the exponential arm ergonomics cost of an element for a given shoulder joint position
+    and arm length.
+
+    The arm ergonomics cost is calculated as an exponential growth with the angle between the vector
+    from the shoulder joint position to the element and the vector from the
+    shoulder joint position to the ground.
+    """
+    # Calculate the arm angle in degrees
+    arm_angle = get_arm_angle_deg(shoulder_joint_position, element)
+
+    # Calculate cost
+    arm_ergonomics_cost = get_exp_arm_ergonomics_cost_from_angle(arm_angle)
     return arm_ergonomics_cost
 
 
