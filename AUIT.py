@@ -75,7 +75,7 @@ def get_at_arms_length_cost(
     arm_length: float,
     element: networking.element.Element,
     tolerance: float = 0.01,
-    decay: float = 0.1,
+    decay: float = 0.5,
 ):
     """Return the at-arms-length cost of an element for a given shoulder joint position
     and arm length. The distance between the element and the shoulder joint position

@@ -76,6 +76,25 @@ def test_scenario_1_utility():
         weights=1/3,
     )
 
+    test_utility_function_at_various_positions(get_utility)
+
+    
+
+def test_scenario_2_to_4_utility():
+    """Test utility function for scenario 2 to 4."""
+    print("Testing utility for scenario 2 to 4...")
+
+    # Get utility function
+    get_utility = experiments.user.get_utility_function(
+        objectives=["neck", "shoulder"],
+        weights=1/2,
+    )
+
+    test_utility_function_at_various_positions(get_utility)
+
+
+def test_utility_function_at_various_positions(get_utility: Callable):
+    """Test a utility function at various positions."""
     # Test utility at eye level (should be > 0)
     print("Testing utility at eye level...")
     layout_with_element_at_eye_level = get_layout_with_element_at_eye_level()
@@ -99,54 +118,6 @@ def test_scenario_1_utility():
         utility_at_waist_level
     )
     print("Utility at waist level: {}".format(utility_at_waist_level))
-    print()
-
-def test_scenario_2_to_4_utility():
-    """Test utility function for scenario 2 to 4."""
-    print("Testing utility for scenario 2 to 4...")
-
-    # Get utility function
-    get_utility = experiments.user.get_utility_function(
-        objectives=["neck", "shoulder"],
-        weights=1/2,
-    )
-
-    # Test utility at eye level (should be > 0)
-    print("Testing utility at eye level...")
-    layout_with_element_at_eye_level = get_layout_with_element_at_eye_level()
-    utility_at_eye_level = get_utility(layout_with_element_at_eye_level, verbose=True)
-    assert (
-        utility_at_eye_level > 0
-    ), "Utility should be greater than 0. Got: {}".format(
-        utility_at_eye_level
-    )
-    print("Utility at eye level: {}".format(utility_at_eye_level))
-    print()
-
-    # Test utility at waist level
-    print("Testing utility at waist level...")
-    layout_with_element_at_waist_level = get_layout_with_element_at_waist_level()
-    utility_at_waist_level = get_utility(layout_with_element_at_waist_level, verbose=True)
-    assert (
-        utility_at_waist_level > 0
-    ), "Utility should be greater than 0. Got: {}".format(
-        utility_at_waist_level
-    )
-    print("Utility at waist level: {}".format(utility_at_waist_level))
-    print()
-
-def test_utility_function_at_various_positions(get_utility: Callable):
-    """Test a utility function at various positions."""
-    # Test utility at eye level (should be > 0)
-    print("Testing utility at eye level...")
-    layout_with_element_at_eye_level = get_layout_with_element_at_eye_level()
-    utility_at_eye_level = get_utility(layout_with_element_at_eye_level, verbose=True)
-    assert (
-        utility_at_eye_level > 0
-    ), "Utility should be greater than 0. Got: {}".format(
-        utility_at_eye_level
-    )
-    print("Utility at eye level: {}".format(utility_at_eye_level))
     print()
 
 def test_utility_population():
@@ -191,8 +162,62 @@ def test_utility_population():
         test_utility_function_at_various_positions(get_utility)
 
 
+def test_shoulder_utility_function():
+    """Test shoulder utility function."""
+    print("Testing shoulder utility function...")
+
+    # Get shoulder utility function
+    get_shoulder_utility = experiments.user.get_utility_function(objectives=["shoulder"], weights=1.0)
+
+    # Test utility at various positions
+    test_utility_function_at_various_positions(get_shoulder_utility)
+
+    # Test utility at eye level (cost should be greater than 0, utility should be less than 1)
+    print("Testing utility at eye level...")
+    layout_with_element_at_eye_level = get_layout_with_element_at_eye_level()
+    utility_at_eye_level = get_shoulder_utility(layout_with_element_at_eye_level, verbose=True)
+    cost_at_eye_level = 1 - utility_at_eye_level
+    assert (
+        utility_at_eye_level < 1
+    ), "Utility should be less than 1. Got: {}".format(
+        utility_at_eye_level
+    )
+    print("Utility at eye level: {}".format(utility_at_eye_level))
+    print()
+
+    # Test cost at eye level (cost should be greater than 0, utility should be less than 1)
+    print("Testing cost at eye level...")
+    assert (
+        cost_at_eye_level > 0
+    ), "Cost should be greater than 0. Got: {}".format(
+        cost_at_eye_level
+    )
+
+    # Test utility at waist level (should approach 1, cost should approach 0)
+    print("Testing utility at waist level...")
+    layout_with_element_at_waist_level = get_layout_with_element_at_waist_level()
+    utility_at_waist_level = get_shoulder_utility(layout_with_element_at_waist_level, verbose=True)
+    cost_at_waist_level = 1 - utility_at_waist_level
+    assert (
+        utility_at_waist_level > 0.9
+    ), "Utility should be greater than 0.9. Got: {}".format(
+        utility_at_waist_level
+    )
+    print("Utility at waist level: {}".format(utility_at_waist_level))
+    print()
+
+    # Test cost at waist level (should approach 1, cost should approach 0)
+    print("Testing cost at waist level...")
+    assert (
+        cost_at_waist_level < 0.1
+    ), "Cost should be less than 0.9. Got: {}".format(
+        cost_at_waist_level
+    )
+
+
 def test_utility_functions():
     """Test various utility functions for the user models."""
+    test_shoulder_utility_function()
     test_utility_population()
     test_scenario_1_utility()
     test_scenario_2_to_4_utility()
@@ -792,14 +817,14 @@ def test_riesz():
 
 def test_evaluation():
     """Test evaluations."""
-    # test_riesz()
+    test_utility_functions()
+    test_riesz()
     test_simulations()
-    # test_utility_functions()
-    # test_random_solver()
-    # test_problem()
-    # test_multiple_single_objectives_solver()
-    # test_weighted_sum_solver()
-    # test_pareto_solver()
+    test_random_solver()
+    test_problem()
+    test_multiple_single_objectives_solver()
+    test_weighted_sum_solver()
+    test_pareto_solver()
 
 
 def main():

@@ -105,6 +105,10 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
     ax.set_xticks(np.arange(len(solver_labels)))
     ax.set_xticklabels(solver_labels)
 
+    # Define the limits for the y-axis
+    ax.set_ylim(0, 15)
+
+
 def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
     """
     Creates a boxplot figure showing the runtime performance of different solvers for two optimization scenarios. 
@@ -149,10 +153,6 @@ def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
     axs[1].set_ylabel("Runtime (s)")
     axs[0].set_xlabel("Optimizer (No. Proposals)")
     axs[1].set_xlabel("Optimizer (No. Proposals)")
-
-    # Define the limits for the y-axis
-    axs[0].set_ylim(0, 60)
-    axs[1].set_ylim(0, 60)
 
     # Define the solvers and number of proposals
     scenarios = ["CONV+LIN", "NCONV+NLIN"]
@@ -316,6 +316,9 @@ def plot_max_utilities_for_scenario(ax: plt.Axes, scenario: str, solvers: List[s
     # Add a dashed horizontal line for the expected utility
     ax.axhline(y=exp_utility, color="black", linestyle="--", alpha=0.2, zorder=0, label="Exp. Utility", linewidth=1)
 
+    # Set the y-axis limits
+    ax.set_ylim(-0.1, 1.1)
+
 def plot_max_utilities(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utilities: dict) -> plt.Figure:
     """
     Plots boxplots of the max utilities for each configuration and scenario.
@@ -350,10 +353,6 @@ def plot_max_utilities(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected
     axs[0].set_xlabel("Optimizer (No. Proposals)")
     axs[1].set_xlabel("Optimizer (No. Proposals)")
 
-    # Define the limits for the y-axis
-    axs[0].set_ylim(0, 1)
-    axs[1].set_ylim(0, 1)
-
     # Get a DataFrame with the max utilities for each condition and configuration
     max_utilities = get_max_utilities(runtimes, utilities)
 
@@ -378,7 +377,7 @@ def plot_max_utilities(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected
     return fig
 
 # Display the max utility and runtime performance in one figure
-def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utilities: dict) -> plt.Figure:
+def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utilities: dict, scenarios: list[str]) -> plt.Figure:
     """
     Plots the runtime and max utility performance in one figure where each scenario is one column and the
     utility/runtime performance are rows.
@@ -394,17 +393,20 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     expected_utilities: dict
         Dictionary containing the expected utility for each scenario.
 
+    scenarios: list[str]
+        List of scenarios to plot (needs to be a subset of the scenarios in the runtimes and utilities DataFrames).
+
     Returns:
     --------
     matplotlib.figure.Figure
         The figure containing the plotted boxplots.
     """
     # Create figure and subplots
-    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(10, 10))
+    fig, axs = plt.subplots(ncols=len(scenarios), nrows=2, figsize=(len(scenarios) * 5, 10))
 
     # Set plot titles
-    axs[0][0].set_title("CONV+LIN")
-    axs[0][1].set_title("NCONV+NLIN")
+    for i, scenario in enumerate(scenarios):
+        axs[0][i].set_title(scenario)
     # axs[1][0].set_title("CONV+LIN")
     # axs[1][1].set_title("NCONV+NLIN")
 
@@ -415,14 +417,13 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     # axs[1][1].set_ylabel("Runtime (s)")
 
     # Set labels for the x-axis
-    axs[1][0].set_xlabel("Optimizer (No. Proposals)")
-    axs[1][1].set_xlabel("Optimizer (No. Proposals)")
+    for i in range(len(scenarios)):
+        axs[1][i].set_xlabel("Optimizer (No. Proposals)")
 
     # Get a DataFrame with the max utilities for each condition and configuration
     max_utilities = get_max_utilities(runtimes, utilities)
 
     # Determine the scenarios, solvers and number of proposals
-    scenarios = ["CONV+LIN", "NCONV+NLIN"]
     solvers = ["WS", "Ours"]
     n_proposals = [1, 10]
     solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
