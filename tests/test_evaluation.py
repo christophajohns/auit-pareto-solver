@@ -626,13 +626,13 @@ def test_simulations():
     SOLVERS = ["Ours", "WS"]
 
     # Get utility functions
-    SCENARIO_1_PREFERENCE_CRITERIA = ["neck", "shoulder", "torso"]
+    SCENARIO_1_PREFERENCE_CRITERIA = ["neck", "shoulder_exp"]
     utility_functions = experiments.user.get_utility_functions_for_different_seeds(
         SCENARIO_1_PREFERENCE_CRITERIA, n_functions=N_UTILITY_FUNCTIONS, seed=111
     )
 
     # Get MOO problem
-    SCENARIO_1_OBJECTIVES = ["neck", "shoulder"]
+    SCENARIO_1_OBJECTIVES = ["neck", "shoulder_exp"]
     problem = experiments.problem.LayoutProblem(
         objectives=SCENARIO_1_OBJECTIVES
     )
@@ -817,9 +817,9 @@ def test_riesz():
 
 def test_evaluation():
     """Test evaluations."""
+    test_simulations()
     test_utility_functions()
     test_riesz()
-    test_simulations()
     test_random_solver()
     test_problem()
     test_multiple_single_objectives_solver()

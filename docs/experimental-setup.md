@@ -104,12 +104,12 @@ To generate a non-convex (concave) Pareto frontier shape, we use the formulation
 
 $$
 SE_{\overline{conv}}(\theta) = \begin{cases}
-        \frac{e^{\frac{\theta \mod 2\pi}{\pi }} - 1}{e-1} & \text{if $\theta \mod 2\pi  \leq \pi$}  \\
-        \frac{e^{-\frac{\theta \mod 2\pi - 2\pi }{\pi }} - 1}{e-1} & \text{otherwise}
+        \frac{e^{\frac{\alpha (\theta \mod 2\pi)}{\pi }} - 1}{e^\alpha-1} & \text{if $\theta \mod 2\pi  \leq \pi$}  \\
+        \frac{e^{-\frac{\alpha (\theta \mod 2\pi - 2\pi )}{\pi }} - 1}{e^\alpha-1} & \text{otherwise}
 \end{cases}
 $$
 
-where $\theta$ is the angle between the vectors in radians.
+where $\theta$ is the angle between the vectors in radians and $\alpha$ is a parameter that controls the steepness of the curve. The parameter $\alpha$ is set to 10 for all evaluations.
 
 #### Reachability (RE)
 

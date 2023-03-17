@@ -106,7 +106,7 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
     ax.set_xticklabels(solver_labels)
 
     # Define the limits for the y-axis
-    ax.set_ylim(0, 15)
+    ax.set_ylim(0, 14)
 
 
 def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
@@ -410,15 +410,17 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     # axs[1][0].set_title("CONV+LIN")
     # axs[1][1].set_title("NCONV+NLIN")
 
+    for i in range(len(scenarios)):
+        # Set labels for the x-axis
+        axs[1][i].set_xlabel("Optimizer (No. Proposals)")
+        # Set scale to log for runtime plots
+        # axs[1][i].set_yscale("log")
+
     # Set labels for the y-axis
     axs[0][0].set_ylabel("Max Utility")
     # axs[0][1].set_ylabel("Max Utility")
     axs[1][0].set_ylabel("Runtime (s)")
     # axs[1][1].set_ylabel("Runtime (s)")
-
-    # Set labels for the x-axis
-    for i in range(len(scenarios)):
-        axs[1][i].set_xlabel("Optimizer (No. Proposals)")
 
     # Get a DataFrame with the max utilities for each condition and configuration
     max_utilities = get_max_utilities(runtimes, utilities)

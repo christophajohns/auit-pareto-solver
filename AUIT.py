@@ -107,16 +107,23 @@ def get_angle_between_vectors(vector1: List[float], vector2: List[float]):
     # The angle is the arccos of the dot product of the two normalized vectors
 
     # If one of the vectors is a zero-vector, return 0
-    if np.linalg.norm(vector1) == 0 or np.linalg.norm(vector2) == 0:
+    vector_1_norm = np.linalg.norm(vector1)
+    vector_2_norm = np.linalg.norm(vector2)
+    if vector_1_norm == 0 or vector_2_norm == 0:
         return 0
 
-    normalized_vector1 = vector1 / np.linalg.norm(vector1)
-    normalized_vector2 = vector2 / np.linalg.norm(vector2)
+    normalized_vector1 = vector1 / vector_1_norm
+    normalized_vector2 = vector2 / vector_2_norm
 
-    angle = math.acos(np.dot(normalized_vector1, normalized_vector2))
+    dot_product = np.dot(normalized_vector1, normalized_vector2)
+
+    if np.allclose(dot_product, 1):
+        return 0
+
+    angle = np.arccos(dot_product)
 
     # If the angle is undefined, return None
-    if math.isnan(angle):
+    if np.isnan(angle):
         return None
 
     return angle
@@ -307,6 +314,7 @@ def get_arm_ergonomics_cost(
 
 def get_exp_arm_ergonomics_cost_from_angle(
     arm_angle: Union[float, None],
+    steepness_factor: float = 10.0,
 ):
     """
     Return the exponential arm ergonomics cost of an element for a given arm angle in degrees.
@@ -327,8 +335,8 @@ def get_exp_arm_ergonomics_cost_from_angle(
     #                          { (e^(-(x mod 2π-2π)/π) - 1)/(e-1) , x mod 2π > π
     # where x is the arm angle in radians
     x_mod = np.mod(arm_angle_rad, 2*np.pi)
-    arm_ergonomics_cost = np.where(x_mod <= np.pi, (np.exp(x_mod/np.pi) - 1)/(np.exp(1)-1), 
-                    (np.exp(-(x_mod-2*np.pi)/np.pi) - 1)/(np.exp(1)-1)).item()
+    arm_ergonomics_cost = np.where(x_mod <= np.pi, steepness_factor * (np.exp(x_mod/np.pi) - 1)/(np.exp(steepness_factor)-1), 
+                    (np.exp(-steepness_factor*(x_mod-2*np.pi)/np.pi) - 1)/(np.exp(steepness_factor)-1)).item()
     return arm_ergonomics_cost
 
 def get_exp_arm_ergonomics_cost(
