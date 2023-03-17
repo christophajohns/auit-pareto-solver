@@ -106,7 +106,7 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
     ax.set_xticklabels(solver_labels)
 
     # Define the limits for the y-axis
-    ax.set_ylim(0, 14)
+    ax.set_ylim(0, 16)
 
 
 def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
