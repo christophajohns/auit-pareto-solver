@@ -30,7 +30,7 @@ def create_random_runtimes(seed: int) -> pd.DataFrame:
     results = []
     n_runs_per_config = 10
     run_id = 0
-    for scenario in ["CONV+LIN", "NCONV+NLIN"]:
+    for scenario in ["LIN+CONV", "NLIN+NCONV"]:
         for solver in ["WS", "Ours"]:
                 for n_proposals in [1, 10]:
                     if solver == "Ours" and n_proposals == 1:
@@ -112,8 +112,8 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
 def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
     """
     Creates a boxplot figure showing the runtime performance of different solvers for two optimization scenarios. 
-    Scenario 1 (CONV+LIN) assumes end-user preferences can be expressed as a linear combination of optimization objectives, 
-    forming a convex Pareto frontier. Scenario 2 (NCONV+NLIN) assumes end-user preferences cannot be expressed as a 
+    Scenario 1 (LIN+CONV) assumes end-user preferences can be expressed as a linear combination of optimization objectives, 
+    forming a convex Pareto frontier. Scenario 2 (NLIN+NCONV) assumes end-user preferences cannot be expressed as a 
     linear combination of the optimization objectives, forming a non-convex Pareto frontier.
 
     The boxplot has the runtime on the y-axis and the solver and number of proposals on the x-axis. There are two boxplots 
@@ -145,8 +145,8 @@ def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
     # fig.suptitle("Runtime Performance")
 
     # Set titles for subplots
-    axs[0].set_title("CONV+LIN")
-    axs[1].set_title("NCONV+NLIN")
+    axs[0].set_title("LIN+CONV")
+    axs[1].set_title("NLIN+NCONV")
 
     # Define labels for x-axis and y-axis
     axs[0].set_ylabel("Runtime (s)")
@@ -155,13 +155,13 @@ def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
     axs[1].set_xlabel("Optimizer (No. Proposals)")
 
     # Define the solvers and number of proposals
-    scenarios = ["CONV+LIN", "NCONV+NLIN"]
+    scenarios = ["LIN+CONV", "NLIN+NCONV"]
     solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
     solvers = ["WS", "WS", "Ours", "Ours"]
     n_proposals = [1, 10, 1, 10]
 
 
-    # For each scenario (CONV+LIN and NCONV+NLIN)...
+    # For each scenario (LIN+CONV and NLIN+NCONV)...
     for i, scenario in enumerate(scenarios):
 
         plot_runtimes_for_scenario(axs[i], scenario, solvers, n_proposals, solver_labels, runtimes)
@@ -204,7 +204,7 @@ def create_random_utilities(seed: int) -> pd.DataFrame:
     run_id = 0
     adaptation_id = 0
     
-    for scenario in ["CONV+LIN", "NCONV+NLIN"]:
+    for scenario in ["LIN+CONV", "NLIN+NCONV"]:
         for solver in ["WS", "Ours"]:
                 for n_proposals in [1, 10]:
                     for run_iter in range(n_runs_per_config):
@@ -344,8 +344,8 @@ def plot_max_utilities(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected
     # fig.suptitle("Max Utility Performance")
 
     # Set titles for subplots
-    axs[0].set_title("CONV+LIN")
-    axs[1].set_title("NCONV+NLIN")
+    axs[0].set_title("LIN+CONV")
+    axs[1].set_title("NLIN+NCONV")
 
     # Define labels for x-axis and y-axis
     axs[0].set_ylabel("Max Utility")
@@ -357,12 +357,12 @@ def plot_max_utilities(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected
     max_utilities = get_max_utilities(runtimes, utilities)
 
     # Determine the scenarios, solvers and number of proposals
-    scenarios = ["CONV+LIN", "NCONV+NLIN"]
+    scenarios = ["LIN+CONV", "NLIN+NCONV"]
     solvers = ["WS", "Ours"]
     n_proposals = [1, 10]
     solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
 
-    # For each scenario (CONV+LIN and NCONV+NLIN)...
+    # For each scenario (LIN+CONV and NLIN+NCONV)...
     for i, scenario in enumerate(scenarios):
 
         plot_max_utilities_for_scenario(axs[i], scenario, solvers, n_proposals, solver_labels, max_utilities, expected_utilities[scenario])
@@ -407,8 +407,8 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     # Set plot titles
     for i, scenario in enumerate(scenarios):
         axs[0][i].set_title(scenario)
-    # axs[1][0].set_title("CONV+LIN")
-    # axs[1][1].set_title("NCONV+NLIN")
+    # axs[1][0].set_title("LIN+CONV")
+    # axs[1][1].set_title("NLIN+NCONV")
 
     for i in range(len(scenarios)):
         # Set labels for the x-axis
@@ -430,7 +430,7 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     n_proposals = [1, 10]
     solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
 
-    # For each scenario (CONV+LIN and NCONV+NLIN)...
+    # For each scenario (LIN+CONV and NLIN+NCONV)...
     for i, scenario in enumerate(scenarios):
 
         # Plot the max utility performance
