@@ -93,6 +93,16 @@ The results of the evaluations can be viewed and replicated using the [Jupyter n
 $ jupyter notebook evaluation.ipynb
 ```
 
+### Troubleshooting
+
+If you are experiencing issues with the solver, you can try the following steps:
+
+- Make sure that the AUIT server is running on port 5556.
+- Make sure that the AUIT client is connection to port 5555.
+- Make sure that AUIT is running on the same machine as the solver.
+- Make sure none of the ports are blocked (e.g., by restarting the solver or AUIT).
+
+
 ## References
 
 [1] H. Seada and K. Deb. A unified evolutionary optimization procedure for single, multiple, and many objectives. IEEE Transactions on Evolutionary Computation, 20(3):358–369, June 2016. [doi:10.1109/TEVC.2015.2459718](https://doi.org/10.1109/TEVC.2015.2459718).
