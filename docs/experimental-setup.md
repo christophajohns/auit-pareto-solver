@@ -80,7 +80,16 @@ The objective functions are dependent on the individual solver. See the paper fo
 
 #### Neck Ergonomics (NE)
 
-The neck ergonomics objective (NE) is based on the RULA neck ergonomics metric. The objective is to minimize the neck load. The objective is defined as the angle between a vector from the eyes straight forward and a vector from the eyes to the UI element (i.e., adaptation). The objective has a minimum value of 0 if the UI element is at eye level of the user and a maximum value of 1 if the UI element is directly above or below the user's eyes. If the element is at the user's eye position, the objective has a value of 1.
+The neck ergonomics objective (NE) is based on the RULA neck ergonomics metric. The objective is to minimize the neck load. The objective is defined as the angle between a vector from the eyes to the target's projection on the xz-plane at the eye position's height (i.e., forward in the direction of the element) and a vector from the eyes to the UI element (i.e., to the adaptation). The objective has a minimum value of 0 if the UI element is at eye level of the user and a maximum value of 1 if the UI element is directly above or below the user's eyes. If the element is at the user's eye position, the objective has a value of 1:
+
+$$
+NE(\beta) = \begin{cases}
+        1 & \text{if $\beta = \pm \frac{\pi}{2}$}\\
+        \frac{|\beta|}{2\pi} & \text{otherwise}
+    \end{cases}
+$$
+
+where $\beta$ is the angle between the vectors.
 
 The goal is to minimize the angle between the vectors and thereby to minimize the neck load.
 
@@ -94,7 +103,7 @@ The goal is to minimize the angle between the vectors and thereby to minimize th
 
 To generate a convex Pareto frontier shape, we use the formulation described where the cost grows linearly with the angle:
 
-$SE_{conv}(\theta) = \frac{\theta}{2\pi}$
+$$SE_{conv}(\theta) = \frac{\theta}{2\pi}$$
 
 where $\theta$ is the angle between the vectors.
 
