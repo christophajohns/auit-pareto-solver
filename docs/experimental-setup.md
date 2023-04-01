@@ -60,11 +60,11 @@ The objectives are based on the RULA workplace ergonomics metrics. The objective
 
 Each utility is defined as a linear combination of these objectives and as a function of an adaptation. Since each objective is formulated as a cost function, the utility is defined as a linear combination of the inverse of the objectives. The utility function is defined as:
 
-$U(\mathbf{x}) = \sum_{i=1}^n w_i (1 - f_i(\mathbf{x})) = \sum_{i=1}^n w_i - \sum_{i=1}^n w_i f_i(\mathbf{x})$
+$U(\mathbf{x}) = \frac{\sum_{i=1}^n w_i (1 - f_i(\mathbf{x}))}{\sum_{i=1}^n w_i} = \frac{\sum_{i=1}^n w_i - \sum_{i=1}^n w_i f_i(\mathbf{x})}{\sum_{i=1}^n w_i}$ = 1 - $\frac{\sum_{i=1}^n w_i f_i(\mathbf{x})}{\sum_{i=1}^n w_i}$
 
-where $u$ is the utility, $w_i$ is the weight of the $i$th objective, $f_i$ is the $i$th objective and $\mathbf{x}$ is the adaptation. The weights are set to $1/n$ for all $n$ objectives in the scenarios and to 0 for all objectives not in the scenario:
+where $u$ is the utility, $w_i$ is the weight of the $i$th objective, $f_i$ is the $i$th objective and $\mathbf{x}$ is the adaptation. The weights are set to a value between 0 and 1 for all $n$ objectives in the scenarios and to 0 for all objectives not in the scenario:
 
-$U(\mathbf{x}) = 1 - \frac{\sum_{i=1}^n f_i(\mathbf{x})}{n}$
+$U(\mathbf{x}) = 1 - \frac{\sum_{i=1}^n f_i(\mathbf{x})}{\sum_{i=1}^n w_i}$
 
 For example:
 

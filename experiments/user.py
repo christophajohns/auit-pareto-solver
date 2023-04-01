@@ -63,7 +63,7 @@ def get_utility_function(objectives: list[OBJECTIVE], weights: Optional[Union[li
                 weight * get_objective_score(adaptation)
                 for (weight, get_objective_score) in zip(weights, objective_functions)
             ]
-        )
+        ) / sum(weights)
 
     return get_utility
 

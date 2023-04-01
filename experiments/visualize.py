@@ -78,6 +78,13 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
     --------
     None
     """
+    # Calculate x-ticks
+    xticks = [j*1.8 + k*0.7 for j in range(len(solvers)) for k in range(len(n_proposals))]
+
+    lightgrey = "#fafafa"
+    grey = "#cccccc"
+    darkgrey = "#333333"
+
     # Get the data for the current scenario
     scenario_data = runtimes[runtimes["scenario"] == scenario]
 
@@ -97,13 +104,27 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
             config_runtimes = n_prop_data["runtime"].values
 
             # Create a boxplot for the current solver and number of proposals
-            ax.boxplot(config_runtimes, positions=[solver_labels.index(f"{solver} ({n_prop} prop)")],
-                        patch_artist=True, widths=0.5, showfliers=True, showmeans=True, meanline=True,
-                        boxprops={"facecolor": "lightgrey"})
+            ax.boxplot(config_runtimes, # positions=[solver_labels.index(f"{solver} ({n_prop} prop)")],
+                        patch_artist=True, widths=0.5, showfliers=True, # notch=True,
+                        boxprops={"facecolor": lightgrey if k == 0 else grey, "edgecolor": darkgrey, "linewidth": 1},
+                        whiskerprops={"color": darkgrey, "linewidth": 1},
+                        capprops={"color": darkgrey, "linewidth": 1},
+                        medianprops={"color": darkgrey, "linewidth": 1},
+                        flierprops={"marker": "o", "markerfacecolor": lightgrey, "markeredgecolor": darkgrey, "markersize": 3},
+                        positions=[xticks[j*len(n_proposals) + k]]
+                    )
 
     # Set labels for the x-axis ticks
-    ax.set_xticks(np.arange(len(solver_labels)))
+    # ax.set_xticks(np.arange(len(solver_labels)))
+    ax.set_xticks(xticks)
     ax.set_xticklabels(solver_labels)
+
+    # Add a lightgrey grid
+    ax.grid(axis="y", color=grey, linestyle="-", linewidth=1, alpha=0.2)
+
+    # Remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
     # Define the limits for the y-axis
     ax.set_ylim(0, 16)
@@ -287,6 +308,13 @@ def plot_max_utilities_for_scenario(ax: plt.Axes, scenario: str, solvers: List[s
     --------
     None
     """
+    # Calculate x-ticks
+    xticks = [j*1.8 + k*0.7 for j in range(len(solvers)) for k in range(len(n_proposals))]
+
+    lightgrey = "#fafafa"
+    grey = "#cccccc"
+    darkgrey = "#333333"
+
     # Get the data for the current scenario
     scenario_data = max_utilities[max_utilities["scenario"] == scenario]
 
@@ -306,18 +334,34 @@ def plot_max_utilities_for_scenario(ax: plt.Axes, scenario: str, solvers: List[s
             config_utilities = n_prop_data["max_utility"].values
 
             # Create a boxplot for the current solver and number of proposals
-            ax.boxplot(config_utilities, positions=[solver_labels.index(f"{solver} ({n_prop} prop)")],
-                        patch_artist=True, widths=0.5, showfliers=True, showmeans=True, meanline=True, boxprops={"facecolor": "lightgrey"})
-
+            ax.boxplot(config_utilities,
+                        patch_artist=True, widths=0.5, showfliers=True, # notch=True,
+                        boxprops={"facecolor": lightgrey if k == 0 else grey, "edgecolor": darkgrey, "linewidth": 1},
+                        whiskerprops={"color": darkgrey, "linewidth": 1},
+                        capprops={"color": darkgrey, "linewidth": 1},
+                        medianprops={"color": darkgrey, "linewidth": 1},
+                        flierprops={"marker": "o", "markerfacecolor": lightgrey, "markeredgecolor": darkgrey, "markersize": 3},
+                        # positions=[solver_labels.index(f"{solver} ({n_prop} prop)")],
+                        positions=[xticks[j*len(n_proposals)+k]],
+                    )
+    
     # Set labels for the x-axis ticks
-    ax.set_xticks(np.arange(len(solver_labels)))
+    # ax.set_xticks(np.arange(len(solver_labels)))
+    ax.set_xticks(xticks)
     ax.set_xticklabels(solver_labels)
+
+    # Add a lightgrey grid
+    ax.grid(axis="y", color=grey, linestyle="-", linewidth=1, alpha=0.2)
+
+    # Remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
     # Add a dashed horizontal line for the expected utility
     ax.axhline(y=exp_utility, color="black", linestyle="--", alpha=0.2, zorder=0, label="Exp. Utility", linewidth=1)
 
     # Set the y-axis limits
-    ax.set_ylim(-0.1, 1.1)
+    ax.set_ylim(0, 1)
 
 def plot_max_utilities(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utilities: dict) -> plt.Figure:
     """
@@ -405,8 +449,14 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     fig, axs = plt.subplots(ncols=len(scenarios), nrows=2, figsize=(len(scenarios) * 5, 10))
 
     # Set plot titles
+    mapping = {
+        "LIN+CONV": "Linear and Convex",
+        "NLIN+NCONV": "Non-Linear and Non-Convex",
+        "NLIN+CONV": "Non-Linear and Convex",
+        "LIN+NCONV": "Linear and Non-Convex",
+    }
     for i, scenario in enumerate(scenarios):
-        axs[0][i].set_title(scenario)
+        axs[0][i].set_title(mapping[scenario], fontweight="bold")
     # axs[1][0].set_title("LIN+CONV")
     # axs[1][1].set_title("NLIN+NCONV")
 
@@ -428,7 +478,7 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     # Determine the scenarios, solvers and number of proposals
     solvers = ["WS", "Ours"]
     n_proposals = [1, 10]
-    solver_labels = ["WS (1 prop)", "WS (10 prop)", "Ours (1 prop)", "Ours (10 prop)"]
+    solver_labels = ["WS (1)", "WS (10)", "Ours (1)", "Ours (10)"]
 
     # For each scenario (LIN+CONV and NLIN+NCONV)...
     for i, scenario in enumerate(scenarios):

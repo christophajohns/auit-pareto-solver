@@ -314,7 +314,7 @@ def get_arm_ergonomics_cost(
 
 def get_exp_arm_ergonomics_cost_from_angle(
     arm_angle: Union[float, None],
-    steepness_factor: float = 10.0,
+    steepness_factor: float = 2.0,
 ):
     """
     Return the exponential arm ergonomics cost of an element for a given arm angle in degrees.
