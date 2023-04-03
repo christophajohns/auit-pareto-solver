@@ -157,8 +157,8 @@ def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
     ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=seed)
 
     # create the algorithm object
-    # algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 1-3
-    algorithm = UNSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
+    algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 1-3
+    # algorithm = UNSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
     # algorithm = SMSEMOA(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
     # algorithm = RVEA(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
 
@@ -171,7 +171,7 @@ def generate_pareto_optimal_layouts_and_suggested(
     n_constraints: int,
     initial_layout: networking.layout.Layout,
     socket,
-    reduce: Optional[Literal['htp', 'aasf']] = 'aasf',
+    reduce: Optional[Literal['htp', 'aasf', 'aasf-riesz']] = 'aasf-riesz',
     plot=False,
     save=False,
     verbose=True,
@@ -253,6 +253,18 @@ def generate_pareto_optimal_layouts_and_suggested(
             # ...reduce the set of Pareto optimal layouts to the high tradeoff points
             htp = HighTradeoffPoints()
             points_of_interest = htp(res.F)  # This is a boolean array
+        elif reduce == "aasf-riesz":
+            # ...reduce the set of Pareto optimal layouts using AASF with Riesz energy norm
+            aasf = AASF(rho=1e-4)
+            MAX_NO_SOLUTION_PROPOSALS = 10
+            ref_dirs = get_reference_directions(
+                "energy", n_objectives, MAX_NO_SOLUTION_PROPOSALS
+            )
+            # Determine the Pareto optimal layouts
+            points_of_interest = np.zeros(res.F.shape[0], dtype=bool)
+            for ref_dir in ref_dirs:
+                aasf_optimum_index = aasf.do(res.F, weights=ref_dir).argmin()
+                points_of_interest[aasf_optimum_index] = True
         elif reduce == "aasf":
             # ...reduce the set of Pareto optimal layouts using AASF
             aasf = AASF(eps=0, beta=5)
