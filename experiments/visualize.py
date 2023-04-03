@@ -127,7 +127,7 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
     ax.spines["right"].set_visible(False)
 
     # Define the limits for the y-axis
-    ax.set_ylim(0, 16)
+    ax.set_ylim(0, 16.5)
 
 
 def plot_runtimes(runtimes: pd.DataFrame) -> plt.Figure:
@@ -358,7 +358,7 @@ def plot_max_utilities_for_scenario(ax: plt.Axes, scenario: str, solvers: List[s
     ax.spines["right"].set_visible(False)
 
     # Add a dashed horizontal line for the expected utility
-    ax.axhline(y=exp_utility, color="black", linestyle="--", alpha=0.2, zorder=0, label="Exp. Utility", linewidth=1)
+    ax.axhline(y=exp_utility, color=darkgrey, linestyle="--", zorder=0, label="Exp. Utility", linewidth=1, alpha=0.5)
 
     # Set the y-axis limits
     ax.set_ylim(0, 1)
