@@ -450,10 +450,10 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
 
     # Set plot titles
     mapping = {
-        "LIN+CONV": "Linear and Convex",
-        "NLIN+NCONV": "Non-Linear and Non-Convex",
-        "NLIN+CONV": "Non-Linear and Convex",
-        "LIN+NCONV": "Linear and Non-Convex",
+        "LIN+CONV": "Complete and Convex",
+        "NLIN+NCONV": "Incomplete and Non-Convex",
+        "NLIN+CONV": "Incomplete and Convex",
+        "LIN+NCONV": "Complete and Non-Convex",
     }
     for i, scenario in enumerate(scenarios):
         axs[0][i].set_title(mapping[scenario], fontweight="bold", pad=16)
