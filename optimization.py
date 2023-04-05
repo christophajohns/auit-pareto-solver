@@ -63,20 +63,20 @@ class LayoutProblem(Problem):
         """Initialize the problem."""
         # Calculate the number of variables
         n_variables = (
-            initial_layout.n_items * 7
+            initial_layout.n_items * 3
         )  # 3 position variables + 4 rotation variables
 
         # Set the lower and upper bounds:
         # Each position is bounded between -3 and 3 for x and z and -2 and 2 for y (This is arbitrary)
         # Each rotation is bounded between 0 and 1 for x, y, z and w
-        xlower = [-3] * n_variables
-        xupper = [3] * n_variables
-        xlower[1] = -2
-        xupper[1] = 2
-        for i in range(3, n_variables, 7):
-            for j in range(4):  # x, y, z and w
-                xlower[i + j] = 0
-                xupper[i + j] = 1
+        xlower = [-1] * n_variables
+        xupper = [1] * n_variables
+        xlower[1] = -1
+        xupper[1] = 1
+        # for i in range(3, n_variables, 7):
+        #     for j in range(4):  # x, y, z and w
+        #         xlower[i + j] = 1
+        #         xupper[i + j] = 1
 
         # Call the superclass constructor
         super().__init__(
@@ -139,7 +139,8 @@ class LayoutProblem(Problem):
             items.append(
                 networking.element.Element(
                     position=networking.element.Position(x=x[i], y=x[i + 1], z=x[i + 2]),
-                    rotation=networking.element.Rotation(x=x[i + 3], y=x[i + 4], z=x[i + 5], w=x[i + 6]),
+                    # rotation=networking.element.Rotation(x=x[i + 3], y=x[i + 4], z=x[i + 5], w=x[i + 6]),
+                    rotation=networking.element.Rotation(),
                 )
             )
 
@@ -154,7 +155,7 @@ def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
     # ref_dirs = get_reference_directions(
     #     "uniform", n_objectives, n_partitions=pop_size-1, seed=seed
     # )  # Exp. 3
-    ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=seed)
+    ref_dirs = get_reference_directions("energy", n_objectives, min(pop_size // 5, 10), seed=seed)
 
     # create the algorithm object
     algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 1-3
@@ -174,7 +175,7 @@ def generate_pareto_optimal_layouts_and_suggested(
     reduce: Optional[Literal['htp', 'aasf', 'aasf-riesz']] = 'aasf-riesz',
     plot=False,
     save=False,
-    verbose=True,
+    verbose=False,
 ) -> tuple[list[networking.layout.Layout], networking.layout.Layout]:
     """Generate the Pareto optimal layouts and a suggested default layout as a compromise solution.
 
@@ -186,7 +187,8 @@ def generate_pareto_optimal_layouts_and_suggested(
         plot: Whether to plot the Pareto front.
     """
     # Start the timer
-    start_time = time.time()
+    if verbose:
+        start_time = time.time()
 
     # Create the problem
     problem = LayoutProblem(
@@ -197,10 +199,10 @@ def generate_pareto_optimal_layouts_and_suggested(
     )
 
     # Create the algorithm
-    algorithm = get_algorithm(n_objectives)
+    algorithm = get_algorithm(n_objectives, pop_size=50)
 
     # Create the termination criterion
-    n_gen = 100  # Exp. 1-3: 100
+    n_gen = 50  # Exp. 1-3: 100
     termination = get_termination("n_gen", n_gen)
 
     # Run the optimization
@@ -209,7 +211,7 @@ def generate_pareto_optimal_layouts_and_suggested(
         algorithm,
         termination,
         seed=1,
-        callback=PrintProgress(n_gen=n_gen),
+        # callback=PrintProgress(n_gen=n_gen),
         # verbose=True,
         save_history=True,
         copy_algorithm=False,
