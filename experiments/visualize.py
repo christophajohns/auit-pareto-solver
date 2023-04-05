@@ -79,7 +79,7 @@ def plot_runtimes_for_scenario(ax: plt.Axes, scenario: str, solvers: List[str], 
     None
     """
     # Calculate x-ticks
-    xticks = [j*1.8 + k*0.7 for j in range(len(solvers)) for k in range(len(n_proposals))]
+    xticks = [j*1.9 + k*0.8 for j in range(len(solvers)) for k in range(len(n_proposals))]
 
     lightgrey = "#fafafa"
     grey = "#cccccc"
@@ -309,7 +309,7 @@ def plot_max_utilities_for_scenario(ax: plt.Axes, scenario: str, solvers: List[s
     None
     """
     # Calculate x-ticks
-    xticks = [j*1.8 + k*0.7 for j in range(len(solvers)) for k in range(len(n_proposals))]
+    xticks = [j*1.9 + k*0.8 for j in range(len(solvers)) for k in range(len(n_proposals))]
 
     lightgrey = "#fafafa"
     grey = "#cccccc"
@@ -448,6 +448,11 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
     # Create figure and subplots
     fig, axs = plt.subplots(ncols=len(scenarios), nrows=2, figsize=(len(scenarios) * 5, 10))
 
+    # Set fontsizes
+    AXIS_FONTSIZE = 16
+    TITLE_FONTSIZE = 16
+    TICK_FONTSIZE = 14
+
     # Set plot titles
     mapping = {
         "LIN+CONV": "Complete and Convex",
@@ -456,20 +461,20 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
         "LIN+NCONV": "Complete and Non-Convex",
     }
     for i, scenario in enumerate(scenarios):
-        axs[0][i].set_title(mapping[scenario], fontweight="bold", pad=16)
+        axs[0][i].set_title(mapping[scenario], fontweight="bold", pad=16, fontsize=TITLE_FONTSIZE)
     # axs[1][0].set_title("LIN+CONV")
     # axs[1][1].set_title("NLIN+NCONV")
 
     for i in range(len(scenarios)):
         # Set labels for the x-axis
-        axs[1][i].set_xlabel("Optimizer (No. Proposals)")
+        axs[1][i].set_xlabel("Optimizer (No. Proposals)", fontsize=AXIS_FONTSIZE)
         # Set scale to log for runtime plots
         # axs[1][i].set_yscale("log")
 
     # Set labels for the y-axis
-    axs[0][0].set_ylabel("Max Utility")
+    axs[0][0].set_ylabel("Max Utility", fontsize=AXIS_FONTSIZE)
     # axs[0][1].set_ylabel("Max Utility")
-    axs[1][0].set_ylabel("Runtime (s)")
+    axs[1][0].set_ylabel("Runtime (s)", fontsize=AXIS_FONTSIZE)
     # axs[1][1].set_ylabel("Runtime (s)")
 
     # Get a DataFrame with the max utilities for each condition and configuration
@@ -488,6 +493,10 @@ def plot_results(runtimes: pd.DataFrame, utilities: pd.DataFrame, expected_utili
 
         # Plot the runtime performance
         plot_runtimes_for_scenario(axs[1][i], scenario, solvers, n_proposals, solver_labels, runtimes)
+
+    # Set axis tick label sizes
+    for ax in axs.flat:
+        ax.tick_params(axis="both", which="major", labelsize=TICK_FONTSIZE)
 
     # Adjust the layout of the subplots
     fig.tight_layout()
