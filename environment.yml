@@ -10,4 +10,5 @@ dependencies:
   - pandas
   - ipympl
   - jupyter
-  - pip
+  - pip:
+    - pymoo
