@@ -69,6 +69,67 @@ def get_pareto_optimal_solutions(
     # Return the Pareto optimal solutions
     return response_data.solutions
 
+def get_semantic_agreement(positive_associations: np.ndarray,
+                           negative_associations: np.ndarray,
+                           distances: np.ndarray,
+                           positive_weight: float = 0.375,
+                           negative_weight: float = 0.675,
+    ):
+    """Return the semantic agreement of an element (i.e., a score that is based on the distance
+    between the closest semantically related object in the user's environment
+    and the element as weighted by the association score)."""
+    # Replace zeros with a tiny value to avoid division by zero
+    small_float = 0.001 # If distance is zero, add 1mm to avoid division by zero
+    squared_distances_without_zero = np.where(distances==0, small_float, distances**2)
+    max_positive_association_distance = (positive_associations / squared_distances_without_zero).max()
+    max_negative_association_distance = (negative_associations / squared_distances_without_zero).max()
+    return positive_weight * max_positive_association_distance - negative_weight * max_negative_association_distance
+
+def get_semantic_mismatch(positive_associations: np.ndarray,
+                           negative_associations: np.ndarray,
+                           distances: np.ndarray,
+                           positive_weight: float = 0.375,
+                           negative_weight: float = 0.675):
+    """Return the semantic mismatch of an element (i.e., a cost that is based on the distance
+    between the closest semantically related object in the user's environment
+    and the element as weighted by the association score)."""
+    semantic_agreement = get_semantic_agreement(positive_associations, negative_associations, distances, positive_weight, negative_weight)
+    return 1 / (1 + np.exp(np.clip(semantic_agreement, -1e2, 1e2)))
+
+def get_semantic_cost(
+    element: networking.element.Element,
+    association_dict: dict,
+    positive_association_weight: float = 0.375,
+    negative_association_weight: float = 0.625,
+):
+    """Return the semantic cost of an element (i.e., a cost that is based on the distance
+    between the closest semantically related object in the user's environment
+    and the element as weighted by the association score)."""
+    # If the element is not associated with any semantic object, return 1
+    if association_dict == {} or len(association_dict["objects"]) == 0:
+        return 1.0
+
+    # Get the distances between the element and the associated objects
+    distances = np.array(
+        [
+            math.sqrt(
+                (element.position.x - object["position"].x) ** 2
+                + (element.position.y - object["position"].y) ** 2
+                + (element.position.z - object["position"].z) ** 2
+            )
+            for object in association_dict["objects"]
+        ],
+        dtype=float
+    )
+
+    # Get the positive and negative associations
+    positive_associations = np.array([object["positive_association_score"] for object in association_dict["objects"]], dtype=float)
+    negative_associations = np.array([object["negative_association_score"] for object in association_dict["objects"]], dtype=float)
+
+    # Calculate the semantic cost
+    semantic_mismatch = get_semantic_mismatch(positive_associations, negative_associations, distances, positive_association_weight, negative_association_weight)
+    return semantic_mismatch
+
 
 def get_at_arms_length_cost(
     shoulder_joint_position: networking.element.Position,

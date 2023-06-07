@@ -512,15 +512,156 @@ def test_torso_ergonomics_cost():
     # Check the cost
     assert nearly_equal(torso_ergonomics_cost_at_ground_level, 0), "Torso ergonomics at ground level cost should be > 0. Got: {}".format(torso_ergonomics_cost_at_ground_level)
 
+def test_semantic_cost():
+    """Test the semantic cost (i.e., a cost that is based on the distance
+    between the closest semantically related object in the user's environment
+    and the element as weighted by the association score)."""
+    print("Testing semantic cost...")
 
+    # Define an association dictionary that holds information about the
+    # semantic association between the element and the objects in the user's
+    # environment as well as about the position of the objects
+
+    # Test with a single association
+    association_dict = {
+        "objects": [
+            {
+                "semantic_class": "headphones",
+                "position": AUIT.networking.element.Position(x=-0.4, y=-0.4, z=0.3),
+                "positive_association_score": 1,
+                "negative_association_score": 0,
+            },
+        ]
+    }
+    element = AUIT.networking.element.Element(
+        id="test_element",
+        position=association_dict["objects"][0]["position"],
+        rotation=AUIT.networking.element.Rotation(x=0.0, y=0.0, z=0.0, w=1.0),
+    )
+    semantic_cost = AUIT.get_semantic_cost(
+        element=element, association_dict=association_dict
+    )
+    assert nearly_equal(semantic_cost, 0), "Semantic cost should be close to 0. Got: {}".format(semantic_cost)
+
+    # Test with two associations
+    association_dict_two_assoc = {
+        "objects": [
+            {
+                "semantic_class": "headphones",
+                "position": AUIT.networking.element.Position(x=-0.4, y=-0.4, z=0.3),
+                "positive_association_score": 1,
+                "negative_association_score": 0,
+            },
+            {
+                "semantic_class": "display",
+                "position": AUIT.networking.element.Position(x=0, y=0, z=0.8),
+                "positive_association_score": 0.7,
+                "negative_association_score": 0.2,
+            }
+        ]
+    }
+    semantic_cost_two_associations = AUIT.get_semantic_cost(
+        element=element, association_dict=association_dict_two_assoc
+    )
+    assert nearly_equal(semantic_cost_two_associations, 0), "Semantic cost should be close to 0. Got: {}".format(semantic_cost_two_associations)
+
+    # Move the element slightly away from the object but use only one association
+    element.position.x += 0.2
+    semantic_cost_slightly_away = AUIT.get_semantic_cost(
+        element=element, association_dict=association_dict
+    )
+    assert nearly_equal(semantic_cost_slightly_away, 0), "Semantic cost should be close to 0. Got: {}".format(semantic_cost_slightly_away)
+
+    
+    # Check the cost away from the headphones and closer to the display
+    semantic_cost_two_associations_slightly_away = AUIT.get_semantic_cost(
+        element=element, association_dict=association_dict_two_assoc
+    )
+    assert semantic_cost_two_associations_slightly_away > semantic_cost_two_associations, "Semantic cost should be > than before. Got: {}, Before: {}".format(semantic_cost_two_associations_slightly_away, semantic_cost_two_associations)
+
+    # Flip the headphones association score
+    association_dict = {
+        "objects": [
+            {
+                "semantic_class": "headphones",
+                "position": AUIT.networking.element.Position(x=-0.4, y=-0.4, z=0.3),
+                "positive_association_score": 0,
+                "negative_association_score": 1,
+            },
+            {
+                "semantic_class": "display",
+                "position": AUIT.networking.element.Position(x=0, y=0, z=0.8),
+                "positive_association_score": 0.7,
+                "negative_association_score": 0.2,
+            }
+        ]
+    }
+    semantic_cost_two_associations_flipped = AUIT.get_semantic_cost(
+        element=element, association_dict=association_dict
+    )
+    assert semantic_cost_two_associations_flipped > semantic_cost_two_associations, "Semantic cost should be < than before. Got: {}, Before: {}".format(semantic_cost_two_associations_flipped, semantic_cost_two_associations)
+
+    # Move element to display
+    element.position = association_dict["objects"][1]["position"]
+    semantic_cost_two_associations_at_display = AUIT.get_semantic_cost(
+        element=element, association_dict=association_dict
+    )
+    assert semantic_cost_two_associations_at_display < semantic_cost_two_associations_flipped, "Semantic cost should be < than before. Got: {}, Before: {}".format(semantic_cost_two_associations_at_display, semantic_cost_two_associations_flipped)
+
+    association_dict = {
+        "objects": [
+            {
+                "semantic_class": "headphones",
+                "position": AUIT.networking.element.Position(x=-0.4, y=-0.4, z=0.3),
+                "positive_association_score": 1.0,
+                "negative_association_score": 0,
+            },
+            {
+                "semantic_class": "display",
+                "position": AUIT.networking.element.Position(x=0, y=0, z=0.8),
+                "positive_association_score": .5,
+                "negative_association_score": 0.2,
+            },
+            {
+                "semantic_class": "clock",
+                "position": AUIT.networking.element.Position(x=-0, y=-1, z=1),
+                "positive_association_score": 0,
+                "negative_association_score": 0,
+            },
+            {
+                "semantic_class": "glasses",
+                "position": AUIT.networking.element.Position(x=0.4, y=-0.4, z=0.2),
+                "positive_association_score": .1,
+                "negative_association_score": 1.0,
+            },
+        ]
+    }
+
+    # Define an element that is positioned at the most relevant object
+    for obj in association_dict["objects"]:
+        element = AUIT.networking.element.Element(
+            id="test_element",
+            position=obj["position"],
+            rotation=AUIT.networking.element.Rotation(x=0.0, y=0.0, z=0.0, w=1.0),
+        )
+
+        # Calculate semantic cost
+        semantic_cost = AUIT.get_semantic_cost(
+            element=element, association_dict=association_dict
+        )
+
+        print("Semantic cost for element at position {} ({}): {}".format(
+            element.position, obj["semantic_class"], semantic_cost
+        ))
 
 def test_cost_evaluation():
     """Test cost evaluation."""
-    test_torso_ergonomics_cost()
-    test_hand_reachability_cost()
-    test_cost_evaluation_at_eye_level()
-    test_cost_evaluation_at_waist_level()
-    test_cost_evaluation_at_arms_length()
+    test_semantic_cost()
+    # test_torso_ergonomics_cost()
+    # test_hand_reachability_cost()
+    # test_cost_evaluation_at_eye_level()
+    # test_cost_evaluation_at_waist_level()
+    # test_cost_evaluation_at_arms_length()
 
 
 def test_AUIT():
