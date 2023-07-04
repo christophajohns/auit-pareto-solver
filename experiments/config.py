@@ -1,7 +1,7 @@
 import AUIT
 from typing import Literal, Callable, Optional
 
-OBJECTIVE = Literal["neck", "shoulder", "shoulder_exp", "torso", "reach"]
+OBJECTIVE = Literal["neck", "shoulder", "shoulder_exp", "torso", "reach", "semantics"]
 
 EYE_POSITION = AUIT.networking.element.Position(x=0.0, y=0.0, z=0.0)
 SHOULDER_JOINT_POSITION = AUIT.networking.element.Position(x=0.0, y=-0.3, z=0.0)

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 def create_random_runtimes(seed: int) -> pd.DataFrame:
     """
@@ -545,3 +546,67 @@ def get_results_df(runtimes: pd.DataFrame, utilities: pd.DataFrame) -> pd.DataFr
 
     # Return the DataFrame
     return results
+
+def plot_minimum_semantic_cost_sensitivity(semantic_costs_df: pd.DataFrame) -> plt.Figure:
+    """Return a figure showing the approximate minimum semantic cost dependent on
+    the number of objects in the interaction space and the variance of the
+    positive and negative association scores as a heatmap.
+
+    The number of objects and association score variance are in log scale.
+    The number of objects ranges from 1 to 64 and the association score variance
+    ranges from 0.02 to 1.28.
+    
+    Parameters:
+    -----------
+    semantic_costs_df: pandas.DataFrame
+        DataFrame containing the minimum semantic costs for each number of objects
+        and association score variance.
+        
+    Returns:
+    --------
+    matplotlib.figure.Figure
+        The figure containing the plotted heatmap.
+    """
+    # Create figure and axes
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    # Get the number of objects and association score variances
+    number_of_objects_params = semantic_costs_df["number_of_objects"].unique()
+    association_score_variance_params = semantic_costs_df["association_score_variance"].unique()
+
+    # Create a heatmap
+    heatmap = ax.imshow(semantic_costs_df["minimum_semantic_cost"].values.reshape(len(association_score_variance_params), len(number_of_objects_params)),
+                        cmap="viridis", origin="lower", aspect="auto",
+                        extent=[np.log10(number_of_objects_params[0]), np.log10(number_of_objects_params[-1]), np.log10(association_score_variance_params[0]), np.log10(association_score_variance_params[-1])])
+    
+    # Add a colorbar
+    fig.colorbar(heatmap, ax=ax, label="Minimum Semantic Cost")
+
+    # Set the x-axis label
+    ax.set_xlabel("Number of Objects (log scale)")
+
+    # Set the y-axis label
+    ax.set_ylabel("Association Score Variance (log scale)")
+
+    # Set the title
+    ax.set_title("Minimum Semantic Cost Sensitivity")
+
+    # Set the x-axis ticks
+    ax.set_xticks(np.log10(number_of_objects_params))
+    ax.set_xticklabels(number_of_objects_params)
+
+    # Set the y-axis ticks
+    ax.set_yticks(np.log10(association_score_variance_params))
+    ax.set_yticklabels(association_score_variance_params)
+
+    # Set the y-axis limits
+    ax.set_ylim(np.log10(association_score_variance_params[0]), np.log10(association_score_variance_params[-1]))
+
+    # Set the x-axis limits
+    ax.set_xlim(np.log10(number_of_objects_params[0]), np.log10(number_of_objects_params[-1]))
+
+    # Show the plot
+    # plt.show()
+
+    # Return the figure object
+    return fig

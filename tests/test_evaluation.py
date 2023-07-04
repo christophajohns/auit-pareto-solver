@@ -23,6 +23,7 @@ import experiments.weighted_sum_solver
 import experiments.single_objectives_solver
 import experiments.problem
 import experiments.simulate
+import experiments.sensitivity
 import AUIT
 import numpy as np
 import pandas as pd
@@ -814,9 +815,343 @@ def test_riesz():
             test_shape(ref_dirs, n_obj, n_ref_points)
             test_well_spaced(ref_dirs)
 
+def test_get_clutter():
+    """Test function to get objects cluttered in the user's environment."""
+    number_of_objects_params = [1, 2, 4, 8, 16, 32, 64, 128]
+    INTERACTION_VOLUME_RADIUS = 2
+    for number_of_objects in number_of_objects_params:
+        object_locations = experiments.sensitivity.get_object_locations(
+            number_of_objects=number_of_objects,
+            interaction_volume_radius=INTERACTION_VOLUME_RADIUS,
+            seed=42,
+        )
+        assert (
+            len(object_locations) == number_of_objects
+        ), "Object locations should have {} objects. Got: {}".format(
+            number_of_objects, len(object_locations)
+        )
+        assert (
+            isinstance(object_locations, list)
+        ), "Object locations should be a list. Got: {}".format(
+            type(object_locations)
+        )
+        for object_location in object_locations:
+            assert (
+                isinstance(object_location, AUIT.networking.element.Position)
+            ), "Object location should be a Position. Got: {}".format(
+                type(object_location)
+            )
+            assert (
+                object_location.x >= -INTERACTION_VOLUME_RADIUS and object_location.x <= INTERACTION_VOLUME_RADIUS
+            ), "Object location should be within the interaction volume. Got: {}".format(
+                object_location
+            )
+            assert (
+                object_location.y >= -INTERACTION_VOLUME_RADIUS and object_location.y <= INTERACTION_VOLUME_RADIUS
+            ), "Object location should be within the interaction volume. Got: {}".format(
+                object_location
+            )
+            assert (
+                object_location.z >= -INTERACTION_VOLUME_RADIUS and object_location.z <= INTERACTION_VOLUME_RADIUS
+            ), "Object location should be within the interaction volume. Got: {}".format(
+                object_location
+            )
+
+def test_get_association_strength():
+    """Test function to get positive and negative association scores based on an input
+    variance for the joint association distribution."""
+    association_score_variance_params = [0.1, 0.5, 1, 2, 5, 10]
+    NUMBER_OF_OBJECTS = 1000
+    all_positive_association_scores = []
+    all_negative_association_scores = []
+    for association_score_variance in association_score_variance_params:
+        association_scores = experiments.sensitivity.get_association_scores(
+            number_of_objects=NUMBER_OF_OBJECTS,
+            association_score_variance=association_score_variance,
+            seed=42,
+        )
+        assert (
+            len(association_scores) == NUMBER_OF_OBJECTS
+        ), "Association scores should have {} objects. Got: {}".format(
+            NUMBER_OF_OBJECTS, len(association_scores)
+        )
+        assert (
+            isinstance(association_scores, list)
+        ), "Association scores should be a list. Got: {}".format(
+            type(association_scores)
+        )
+        for association_score in association_scores:
+            assert (
+                isinstance(association_score, dict)
+            ), "Association score should be a dict. Got: {}".format(
+                type(association_score)
+            )
+            assert (
+                "positive_association_score" in association_score
+            ), "Association score should have a positive_association_score key. Got: {}".format(
+                association_score
+            )
+            assert (
+                "negative_association_score" in association_score
+            ), "Association score should have a negative_association_score key. Got: {}".format(
+                association_score
+            )
+            assert (
+                isinstance(association_score["positive_association_score"], float)
+            ), "Association score should be a float. Got: {}".format(
+                type(association_score["positive_association_score"])
+            )
+            assert (
+                isinstance(association_score["negative_association_score"], float)
+            ), "Association score should be a float. Got: {}".format(
+                type(association_score["negative_association_score"])
+            )
+            assert (
+                association_score["positive_association_score"] >= 0 and association_score["positive_association_score"] <= 1
+            ), "Association score should be between 0 and 1. Got: {}".format(
+                association_score["positive_association_score"]
+            )
+            assert (
+                association_score["negative_association_score"] >= 0 and association_score["negative_association_score"] <= 1
+            ), "Association score should be between 0 and 1. Got: {}".format(
+                association_score["negative_association_score"]
+            )
+        # Check that the positive and negative association scores are correlated
+        positive_association_scores = [association_score["positive_association_score"] for association_score in association_scores]
+        negative_association_scores = [association_score["negative_association_score"] for association_score in association_scores]
+        all_positive_association_scores.append(positive_association_scores)
+        all_negative_association_scores.append(negative_association_scores)
+        assert (
+            np.corrcoef(positive_association_scores, negative_association_scores)[0, 1] > 0
+        ), "Positive and negative association scores should be positively correlated. Got: {}".format(
+            np.corrcoef(positive_association_scores, negative_association_scores)[0, 1]
+        )
+        # Check that the variance of the positive and negative association scores is similar
+        assert (
+            np.var(positive_association_scores) / np.var(negative_association_scores) > 0.8 and np.var(positive_association_scores) / np.var(negative_association_scores) < 1.2
+        ), "Variance of positive and negative association scores should be similar. Got: {}".format(
+            np.var(positive_association_scores) / np.var(negative_association_scores)
+        )
+        # Check that the mean of the positive and negative association scores is similar
+        assert (
+            np.mean(positive_association_scores) / np.mean(negative_association_scores) > 0.8 and np.mean(positive_association_scores) / np.mean(negative_association_scores) < 1.2
+        ), "Mean of positive and negative association scores should be similar. Got: {}".format(
+            np.mean(positive_association_scores) / np.mean(negative_association_scores)
+        )
+        # Check that the positive and negative association scores are not too close to 0 or 1
+        assert (
+            np.mean(positive_association_scores) > 0.1 and np.mean(positive_association_scores) < 0.9
+        ), "Mean of positive association scores should be between 0.1 and 0.9. Got: {}".format(
+            np.mean(positive_association_scores)
+        )
+        assert (
+            np.mean(negative_association_scores) > 0.1 and np.mean(negative_association_scores) < 0.9
+        ), "Mean of negative association scores should be between 0.1 and 0.9. Got: {}".format(
+            np.mean(negative_association_scores)
+        )
+    # Check that the variance of the positive and negative association scores is correlated
+    # with the input variance
+    assert (
+        np.corrcoef(association_score_variance_params, [np.var(association_scores) for association_scores in all_positive_association_scores])[0, 1] > 0.6
+    ), "Variance of positive association scores should be correlated with input variance. Got: {}".format(
+        np.corrcoef(association_score_variance_params, [np.var(association_scores) for association_scores in all_positive_association_scores])[0, 1]
+    )
+    assert (
+        np.corrcoef(association_score_variance_params, [np.var(association_scores) for association_scores in all_negative_association_scores])[0, 1] > 0.6
+    ), "Variance of negative association scores should be correlated with input variance. Got: {}".format(
+        np.corrcoef(association_score_variance_params, [np.var(association_scores) for association_scores in all_negative_association_scores])[0, 1]
+    )
+
+def test_get_clutter_association_grid():
+    """Test function to create a grid (i.e., a matrix with lists of objects) based on the
+    number of object and association strength variance inputs."""
+    # Make a logarithmic grid of number of objects and association strength variance
+    number_of_objects_params = np.logspace(base=2, start=0, stop=6, num=7, dtype=int) # 1 to 64
+    association_score_variance_params = np.logspace(base=0.5, start=3, stop=-3, num=7) # 0.125 to 8
+    association_dicts = experiments.sensitivity.get_clutter_association_grid(
+        number_of_objects_params=number_of_objects_params,
+        association_score_variance_params=association_score_variance_params,
+        seed=42,
+    )
+    assert (
+        isinstance(association_dicts, list)
+    ), "Association dicts should be a list. Got: {}".format(
+        type(association_dicts)
+    )
+    assert (
+        len(association_dicts) == len(number_of_objects_params) * len(association_score_variance_params)
+    ), "Association dicts should have {} elements. Got: {}".format(
+        len(number_of_objects_params) * len(association_score_variance_params), len(association_dicts)
+    )
+    for association_dict in association_dicts:
+        assert (
+            isinstance(association_dict, dict)
+        ), "Association dict should be a dict. Got: {}".format(
+            type(association_dict)
+        )
+        assert (
+            "objects" in association_dict
+        ), "Association dict should have a objects key. Got: {}".format(
+            association_dict
+        )
+        assert (
+            isinstance(association_dict["objects"], list)
+        ), "Association dict should have a list of objects. Got: {}".format(
+            type(association_dict["objects"])
+        )
+        assert (
+            "number_of_objects" in association_dict
+        ), "Association dict should have a number_of_objects key. Got: {}".format(
+            association_dict
+        )
+        assert (
+            isinstance(association_dict["number_of_objects"], int)
+        ), "Association dict should have an int for number_of_objects. Got: {}".format(
+            type(association_dict["number_of_objects"])
+        )
+        assert (
+            "association_score_variance" in association_dict
+        ), "Association dict should have a association_score_variance key. Got: {}".format(
+            association_dict
+        )
+        assert (
+            isinstance(association_dict["association_score_variance"], float)
+        ), "Association dict should have a float for association_score_variance. Got: {}".format(
+            type(association_dict["association_score_variance"])
+        )
+        assert (
+            association_dict["number_of_objects"] in number_of_objects_params
+        ), "Association dict should have a number_of_objects in number_of_objects_params. Got: {}".format(
+            association_dict["number_of_objects"]
+        )
+        assert (
+            association_dict["association_score_variance"] in association_score_variance_params
+        ), "Association dict should have a association_score_variance in association_score_variance_params. Got: {}".format(
+            association_dict["association_score_variance"]
+        )
+        assert (
+            len(association_dict["objects"]) == association_dict["number_of_objects"]
+        ), "Association dict should have {} objects. Got: {}".format(
+            association_dict["number_of_objects"], len(association_dict["objects"])
+        )
+
+def test_get_semantic_costs_for_grid():
+    """Test the function to get the associated minimum semantic cost for each cell in a grid
+    with a set number of objects and association strength variance."""
+    number_of_objects_params = np.logspace(base=2, start=0, stop=6, num=7, dtype=int) # 1 to 64
+    association_score_variance_params = np.logspace(base=2, start=1, stop=7, num=7)/100. # 0.02 to 1.28
+    association_dicts = experiments.sensitivity.get_clutter_association_grid(
+        number_of_objects_params=number_of_objects_params,
+        association_score_variance_params=association_score_variance_params,
+        seed=42,
+    )
+    semantic_costs = experiments.sensitivity.get_minimum_semantic_costs_for_grid(
+        association_dicts=association_dicts,
+        seed=42,
+    )
+    assert (
+        isinstance(semantic_costs, list)
+    ), "Semantic costs should be a list. Got: {}".format(
+        type(semantic_costs)
+    )
+    assert (
+        len(semantic_costs) == len(number_of_objects_params) * len(association_score_variance_params)
+    ), "Semantic costs should have {} elements. Got: {}".format(
+        len(number_of_objects_params) * len(association_score_variance_params), len(semantic_costs)
+    )
+    # Check that not all semantic costs are the same
+    assert (
+        len(set(semantic_costs)) > 1
+    ), "Semantic costs should not all be the same. Got: {}".format(
+        semantic_costs
+    )
+    for semantic_cost in semantic_costs:
+        assert (
+            isinstance(semantic_cost, float)
+        ), "Semantic cost should be a float. Got: {}".format(
+            type(semantic_cost)
+        )
+
+def test_get_semantic_costs_grid_dataframe():
+    """Test the function to get a DataFrame with the semantic costs for each cell in a grid
+    with a set number of objects and association strength variance."""
+    number_of_objects_params = np.logspace(base=2, start=0, stop=6, num=7, dtype=int) # 1 to 64
+    association_score_variance_params = np.logspace(base=2, start=1, stop=7, num=7)/100. # 0.02 to 1.28
+    association_dicts = experiments.sensitivity.get_clutter_association_grid(
+        number_of_objects_params=number_of_objects_params,
+        association_score_variance_params=association_score_variance_params,
+        seed=42,
+    )
+    semantic_costs = experiments.sensitivity.get_minimum_semantic_costs_for_grid(
+        association_dicts=association_dicts,
+        seed=42,
+    )
+    semantic_costs_grid_df = experiments.sensitivity.get_semantic_costs_grid_dataframe(
+        association_dicts=association_dicts,
+        semantic_costs=semantic_costs,
+    )
+    assert (
+        isinstance(semantic_costs_grid_df, pd.DataFrame)
+    ), "Semantic costs grid should be a pd.DataFrame. Got: {}".format(
+        type(semantic_costs_grid_df)
+    )
+    assert (
+        semantic_costs_grid_df.shape[0] == len(number_of_objects_params) * len(association_score_variance_params)
+    ), "Semantic costs grid should have {} rows. Got: {}".format(
+        len(number_of_objects_params) * len(association_score_variance_params), semantic_costs_grid_df.shape[0]
+    )
+    assert (
+        semantic_costs_grid_df.shape[1] == 3
+    ), "Semantic costs grid should have 3 columns. Got: {}".format(
+        semantic_costs_grid_df.shape[1]
+    )
+    assert (
+        set(semantic_costs_grid_df.columns) == set(["number_of_objects", "association_score_variance", "minimum_semantic_cost"])
+    ), "Semantic costs grid should have columns: {}. Got: {}".format(
+        ["number_of_objects", "association_score_variance", "minimum_semantic_cost"], semantic_costs_grid_df.columns
+    )
+    for index, row in semantic_costs_grid_df.iterrows():
+        assert (
+            row["number_of_objects"] in number_of_objects_params
+        ), "Semantic costs grid should have a number_of_objects in number_of_objects_params. Got: {}".format(
+            row["number_of_objects"]
+        )
+        assert (
+            row["association_score_variance"] in association_score_variance_params
+        ), "Semantic costs grid should have a association_score_variance in association_score_variance_params. Got: {}".format(
+            row["association_score_variance"]
+        )
+        assert (
+            row["minimum_semantic_cost"] in semantic_costs
+        ), "Semantic costs grid should have a minimum_semantic_cost in semantic_costs. Got: {}".format(
+            row["minimum_semantic_cost"]
+        )
+
+def test_sensitivity_of_semantic_cost():
+    """Test the sensitivity of the semantic cost objective on clutter (i.e., density of objects
+    in the user's environment) and on association strength (i.e., variance of positive and negative
+    association scores)."""
+    test_get_clutter()
+    test_get_association_strength()
+    test_get_clutter_association_grid()
+    test_get_semantic_costs_for_grid()
+    test_get_semantic_costs_grid_dataframe()
+
+def test_sensitivity_of_max_utility_with_semantic_cost():
+    """Test the sensitivity of the maximum utility for a simulated population of users with
+    underspecified preferences which include the semantic cost to clutter and association strength
+    for both the weighted sum solver and the Pareto solver."""
+    pass
+
+def test_sensitivity_analysis():
+    """Test the required functions for sensitivity analysis of the semantic cost in AUIT."""
+    test_sensitivity_of_semantic_cost()
+    test_sensitivity_of_max_utility_with_semantic_cost()
+
 
 def test_evaluation():
     """Test evaluations."""
+    test_sensitivity_analysis()
     test_simulations()
     test_utility_functions()
     test_riesz()
