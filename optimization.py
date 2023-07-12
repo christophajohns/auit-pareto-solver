@@ -13,7 +13,9 @@ from pymoo.termination import get_termination
 from pymoo.optimize import minimize
 from pymoo.mcdm.high_tradeoff import HighTradeoffPoints
 from pymoo.decomposition.aasf import AASF
+from pymoo.decomposition.weighted_sum import WeightedSum
 from pymoo.visualization.scatter import Scatter
+from pymoo.operators.mutation.pm import PM
 import client
 import networking.layout
 import networking.element
@@ -63,20 +65,15 @@ class LayoutProblem(Problem):
         """Initialize the problem."""
         # Calculate the number of variables
         n_variables = (
-            initial_layout.n_items * 7
+            initial_layout.n_items * 3
         )  # 3 position variables + 4 rotation variables
 
         # Set the lower and upper bounds:
         # Each position is bounded between -3 and 3 for x and z and -2 and 2 for y (This is arbitrary)
         # Each rotation is bounded between 0 and 1 for x, y, z and w
-        xlower = [-3] * n_variables
-        xupper = [3] * n_variables
-        xlower[1] = -2
-        xupper[1] = 2
-        for i in range(3, n_variables, 7):
-            for j in range(4):  # x, y, z and w
-                xlower[i + j] = 0
-                xupper[i + j] = 1
+        xlower = [-0.5, -1, 0.5] # [right, up, forward] for positive values
+        # xupper = [0.5, 0.2, 1.2]
+        xupper = [0.5, -0.1, 1.2]
 
         # Call the superclass constructor
         super().__init__(
@@ -135,11 +132,11 @@ class LayoutProblem(Problem):
         """Convert the decision variables to a layout."""
         # Create a list of items
         items = []
-        for i in range(0, len(x), 7):
+        for i in range(0, len(x), 3):
             items.append(
                 networking.element.Element(
                     position=networking.element.Position(x=x[i], y=x[i + 1], z=x[i + 2]),
-                    rotation=networking.element.Rotation(x=x[i + 3], y=x[i + 4], z=x[i + 5], w=x[i + 6]),
+                    rotation=networking.element.Rotation(),
                 )
             )
 
@@ -157,7 +154,7 @@ def get_algorithm(n_objectives: int, pop_size: int = 100, seed: int = 1):
     ref_dirs = get_reference_directions("energy", n_objectives, pop_size, seed=seed)
 
     # create the algorithm object
-    algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 1-3
+    algorithm = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed, mutation=PM(eta=50))  # Exp. 1-3
     # algorithm = UNSGA3(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
     # algorithm = SMSEMOA(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
     # algorithm = RVEA(pop_size=pop_size, ref_dirs=ref_dirs, seed=seed)  # Exp. 3
@@ -172,7 +169,7 @@ def generate_pareto_optimal_layouts_and_suggested(
     initial_layout: networking.layout.Layout,
     socket,
     reduce: Optional[Literal['htp', 'aasf', 'aasf-riesz']] = 'aasf-riesz',
-    plot=False,
+    plot=True,
     save=False,
     verbose=True,
 ) -> tuple[list[networking.layout.Layout], networking.layout.Layout]:
@@ -200,7 +197,7 @@ def generate_pareto_optimal_layouts_and_suggested(
     algorithm = get_algorithm(n_objectives)
 
     # Create the termination criterion
-    n_gen = 100  # Exp. 1-3: 100
+    n_gen = 1000  # Exp. 1-3: 100
     termination = get_termination("n_gen", n_gen)
 
     # Run the optimization
@@ -280,10 +277,16 @@ def generate_pareto_optimal_layouts_and_suggested(
                 aasf_optimum_index = aasf.do(res.F, weights=weight_combination).argmin()
                 points_of_interest[aasf_optimum_index] = True
 
-        # Add the high tradeoff points to the scatterplot
+        # Add the decomposition points to the scatterplot
         scatterplot.add(
             res.F[points_of_interest], s=40, facecolors="none", edgecolors="r"
         )
+
+        # Add the equally weighted sum point to the scatterplot as an x
+        ws = WeightedSum()
+        equal_weights = np.ones(res.F.shape[1] if res.F.ndim == 2 else len(res.F))
+        ws_optimum_index = ws.do(res.F, weights=equal_weights).argmin()
+        scatterplot.add(res.F[ws_optimum_index], s=120, marker="x")
 
         # If the Pareto front should be plotted, plot it
         if plot:
@@ -292,7 +295,17 @@ def generate_pareto_optimal_layouts_and_suggested(
         # Return the Pareto optimal layouts
         pareto_optimal_layouts = [problem._x_to_layout(x) for x in res.X[points_of_interest]]
         # Determine the AASF equal weights layout
-        suggested_layout = get_aasf_equal_weights_layout(problem, res)
+        # suggested_layout = get_aasf_equal_weights_layout(problem, res)
+        suggested_layout = get_ws_equal_weights_layout(problem, res)
+        def get_layout_str(layout):
+            x_rounded = round(layout.items[0].position.x, 2)
+            y_rounded = round(layout.items[0].position.y, 2)
+            z_rounded = round(layout.items[0].position.z, 2)
+            return f"Position: x={x_rounded}, y={y_rounded}, z={z_rounded}"
+        for idx, layout in enumerate(pareto_optimal_layouts):
+            layout_str = get_layout_str(layout)
+            print(f"Layout {idx+1}: {layout_str}")
+        # print("Pareto optimal layouts: %s" % pareto_optimal_layouts)
         return pareto_optimal_layouts, suggested_layout
 
     # If the Pareto front should be plotted, plot it
@@ -304,6 +317,14 @@ def generate_pareto_optimal_layouts_and_suggested(
     # Determine the AASF equal weights layout
     suggested_layout = get_aasf_equal_weights_layout(problem, res)
     return pareto_optimal_layouts, suggested_layout
+
+def get_ws_equal_weights_layout(problem: LayoutProblem, res: Result) -> networking.layout.Layout:
+    """Returns a layout via an equally weighted sum decomposition of the objectives."""
+    ws = WeightedSum()
+    equal_weights = np.ones(res.F.shape[1] if res.F.ndim == 2 else len(res.F))
+    compromise_point = res.X[ws.do(res.F, weights=equal_weights).argmin()]
+    equal_weights_layout = problem._x_to_layout(compromise_point)
+    return equal_weights_layout
 
 
 def get_aasf_equal_weights_layout(problem: LayoutProblem, res: Result) -> networking.layout.Layout:
